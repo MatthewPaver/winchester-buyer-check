@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A private, browser-only homebuyer budget calculator for Winchester buyers." />
+    <meta name="theme-color" content="#102a26" />
+    <title>Winchester Buyer Check</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Winchester Buyer Check home">
+        <span class="brand-mark" aria-hidden="true">W</span>
+        <span>Winchester Buyer Check</span>
+      </a>
+      <span class="privacy-pill">Runs privately in your browser</span>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">A clearer first pass</p>
+          <h1>Know the real shape of a home purchase.</h1>
+          <p class="lede">Estimate your cash needed, mortgage payment and monthly ownership buffer before a viewing becomes an expensive decision.</p>
+        </div>
+        <div class="hero-note">
+          <strong>No sign-up. No data upload.</strong>
+          <span>Your figures never leave this device.</span>
+        </div>
+      </section>
+
+      <section class="calculator" aria-label="Homebuyer budget calculator">
+        <form id="buyer-form" class="inputs">
+          <div class="section-heading">
+            <p class="step">01</p>
+            <div><h2>Purchase</h2><p>Start with the offer and cash you plan to contribute.</p></div>
+          </div>
+          <div class="field-grid">
+            <label>Purchase price <span class="money-field"><span>£</span><input id="price" type="number" min="10000" step="1000" value="450000" /></span></label>
+            <label>Deposit <span class="money-field"><span>£</span><input id="deposit" type="number" min="0" step="1000" value="67500" /></span></label>
+            <label>Mortgage rate <span class="suffix-field"><input id="rate" type="number" min="0" max="20" step="0.05" value="4.5" /><span>%</span></span></label>
+            <label>Mortgage term <span class="suffix-field"><input id="term" type="number" min="1" max="40" step="1" value="30" /><span>years</span></span></label>
+          </div>
+
+          <div class="section-heading spaced">
+            <p class="step">02</p>
+            <div><h2>Buying costs</h2><p>Enter quotes or sensible allowances. Tax is manual because circumstances vary.</p></div>
+          </div>
+          <div class="field-grid costs">
+            <label>Transaction tax <span class="money-field"><span>£</span><input id="tax" type="number" min="0" step="100" value="0" /></span></label>
+            <label>Legal &amp; searches <span class="money-field"><span>£</span><input id="legal" type="number" min="0" step="100" value="2500" /></span></label>
+            <label>Survey <span class="money-field"><span>£</span><input id="survey" type="number" min="0" step="100" value="900" /></span></label>
+            <label>Moving costs <span class="money-field"><span>£</span><input id="moving" type="number" min="0" step="100" value="1800" /></span></label>
+            <label>Immediate works <span class="money-field"><span>£</span><input id="works" type="number" min="0" step="500" value="10000" /></span></label>
+            <label>Monthly ownership buffer <span class="money-field"><span>£</span><input id="buffer" type="number" min="0" step="25" value="350" /></span></label>
+          </div>
+        </form>
+
+        <aside class="results" aria-live="polite">
+          <p class="result-kicker">Your first-pass picture</p>
+          <div class="primary-result">
+            <span>Estimated monthly mortgage</span>
+            <strong id="monthly">£0</strong>
+          </div>
+          <dl>
+            <div><dt>Mortgage required</dt><dd id="loan">£0</dd></div>
+            <div><dt>Loan-to-value</dt><dd id="ltv">0%</dd></div>
+            <div><dt>Cash needed at completion</dt><dd id="cash">£0</dd></div>
+            <div><dt>Monthly cost with buffer</dt><dd id="monthly-total">£0</dd></div>
+            <div><dt>Interest over full term</dt><dd id="interest">£0</dd></div>
+          </dl>
+          <div id="signal" class="signal"><span></span><p></p></div>
+          <button id="copy-summary" type="button">Copy a private summary</button>
+          <p id="copy-status" class="copy-status" role="status"></p>
+        </aside>
+      </section>
+
+      <section class="explainers">
+        <article><span>Cash</span><h3>Budget beyond the deposit</h3><p>The completion figure combines your deposit with every buying-cost allowance above.</p></article>
+        <article><span>Debt</span><h3>Watch the LTV boundary</h3><p>A small price or deposit change can move the mortgage into a different lending band.</p></article>
+        <article><span>Resilience</span><h3>Keep a monthly buffer</h3><p>Mortgage payments are only one part of ownership. Add maintenance, insurance and service charges where relevant.</p></article>
+      </section>
+
+      <section class="disclaimer">
+        <h2>Useful, not financial advice.</h2>
+        <p>This is an illustrative calculator. It does not include lender fees, insurance, service charges or tax rules unless you enter them. Confirm affordability, taxes and mortgage terms with qualified professionals before making a commitment.</p>
+      </section>
+    </main>
+
+    <footer><span>Built by <a href="https://github.com/MatthewPaver">Matthew Paver</a></span><span>© <span id="year"></span> Winchester Buyer Check</span></footer>
+    <script src="app.js"></script>
+  </body>
+</html>
