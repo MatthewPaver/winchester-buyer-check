@@ -4,18 +4,8 @@ const formatMoney = new Intl.NumberFormat('en-GB',{style:'currency',currency:'GB
 const value = (id) => Math.max(0, Number(inputs[id].value) || 0);
 
 function calculate(){
-  const price=value('price');
-  const deposit=Math.min(value('deposit'),price);
-  const loan=Math.max(0,price-deposit);
-  const annualRate=value('rate')/100;
-  const months=Math.max(12,Math.round(value('term')*12));
-  const monthlyRate=annualRate/12;
-  const monthly=loan===0?0:monthlyRate===0?loan/months:loan*(monthlyRate*Math.pow(1+monthlyRate,months))/(Math.pow(1+monthlyRate,months)-1);
-  const costs=value('tax')+value('legal')+value('survey')+value('moving')+value('works');
-  const cash=deposit+costs;
-  const ltv=price?loan/price*100:0;
-  const totalInterest=Math.max(0,monthly*months-loan);
-  const monthlyTotal=monthly+value('buffer');
+  const result=window.BuyerCalculator.calculatePurchase(Object.fromEntries(ids.map((id)=>[id,value(id)])));
+  const {price,deposit,loan,monthly,ltv,cash,monthlyTotal,totalInterest}=result;
   document.getElementById('monthly').textContent=formatMoney.format(monthly);
   document.getElementById('loan').textContent=formatMoney.format(loan);
   document.getElementById('ltv').textContent=`${ltv.toFixed(1)}%`;
@@ -24,7 +14,8 @@ function calculate(){
   document.getElementById('interest').textContent=formatMoney.format(totalInterest);
   const signal=document.getElementById('signal').querySelector('p');
   signal.textContent=ltv>90?'Your LTV is above 90%. A larger deposit could materially change the lending options available.':ltv>75?'Your LTV sits between 75% and 90%. Compare lender bands before fixing the deposit.':'Your LTV is 75% or lower. Keep enough cash aside for costs and post-completion surprises.';
-  return {price,deposit,loan,monthly,ltv,cash,monthlyTotal,totalInterest};
+  document.getElementById('result-status').textContent=`Estimate updated. Monthly mortgage ${formatMoney.format(monthly)}. Loan to value ${ltv.toFixed(1)}%.`;
+  return result;
 }
 
 ids.forEach((id)=>inputs[id].addEventListener('input',calculate));
