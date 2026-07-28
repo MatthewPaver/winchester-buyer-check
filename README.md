@@ -24,4 +24,5 @@ All calculations happen locally. No figures are transmitted or stored. The calcu
 
 ## Rights
 
-Copyright © 2026 Matthew Paver. This repository is publicly viewable, but no open-source licence is granted. See [NOTICE.md](NOTICE.md).
+Source code is available under the [MIT License](LICENSE). See
+[NOTICE.md](NOTICE.md) for the project-identity and advice disclaimers.
