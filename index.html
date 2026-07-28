@@ -3,96 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="A private, browser-only homebuyer budget calculator for Winchester buyers." />
-    <meta name="theme-color" content="#102a26" />
-    <title>Winchester Buyer Check</title>
+    <meta
+      name="description"
+      content="A seeded, browser-only demo of Winchester House Hunter: compare homes, inspect market evidence and test a buying plan."
+    />
+    <meta name="theme-color" content="#0b1215" />
+    <title>Winchester House Hunter · Interactive demo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <a class="brand" href="#top" aria-label="Winchester Buyer Check home">
-        <span class="brand-mark" aria-hidden="true">W</span>
-        <span>Winchester Buyer Check</span>
+    <a class="skip-link" href="#workspace">Skip to workspace</a>
+
+    <header class="app-header">
+      <a class="brand" href="#homes" data-route="homes" aria-label="Winchester House Hunter home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m4 11 8-7 8 7v9h-6v-6h-4v6H4z" /></svg>
+        </span>
+        <span><small>Winchester</small><strong>House Hunter</strong></span>
       </a>
-      <span class="privacy-pill">Runs privately in your browser</span>
+
+      <div class="workspace-switcher" aria-label="Demo workspace">
+        <span>Viewing</span>
+        <strong>Seeded first-buyer shortlist</strong>
+      </div>
+
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="#homes" data-route="homes"><span>Homes</span><b id="nav-home-count">9</b></a>
+        <a href="#market" data-route="market"><span>Market</span></a>
+        <a href="#plan" data-route="plan"><span>Plan</span></a>
+        <a href="#review" data-route="review"><span>Review</span></a>
+        <a href="#evidence" data-route="evidence"><span>Evidence</span></a>
+      </nav>
     </header>
 
-    <main id="top">
-      <section class="hero">
-        <div>
-          <p class="eyebrow">A clearer first pass</p>
-          <h1>Know the real shape of a home purchase.</h1>
-          <p class="lede">Estimate your cash needed, mortgage payment and monthly ownership buffer before a viewing becomes an expensive decision.</p>
-        </div>
-        <div class="hero-note">
-          <strong>No sign-up. No data upload.</strong>
-          <span>Your figures never leave this device.</span>
-        </div>
-      </section>
+    <div class="demo-strip" role="note">
+      <span>Interactive demo</span>
+      <p>Seeded examples and aggregated public data. Nothing is uploaded or saved to a server.</p>
+      <button id="reset-demo" type="button">Reset demo</button>
+    </div>
 
-      <section class="calculator" aria-label="Homebuyer budget calculator">
-        <form id="buyer-form" class="inputs">
-          <div class="section-heading">
-            <p class="step">01</p>
-            <div><h2>Purchase</h2><p>Start with the offer and cash you plan to contribute.</p></div>
-          </div>
-          <div class="field-grid">
-            <label>Purchase price <span class="money-field"><span aria-hidden="true">£</span><input id="price" type="number" min="10000" step="1000" value="450000" /></span></label>
-            <label>Deposit <span class="money-field"><span aria-hidden="true">£</span><input id="deposit" type="number" min="0" step="1000" value="67500" /></span></label>
-            <label>Mortgage rate <span class="suffix-field"><input id="rate" aria-label="Mortgage rate percentage" type="number" min="0" max="20" step="0.05" value="4.5" /><span aria-hidden="true">%</span></span></label>
-            <label>Mortgage term <span class="suffix-field"><input id="term" aria-label="Mortgage term in years" type="number" min="1" max="40" step="1" value="30" /><span aria-hidden="true">years</span></span></label>
-          </div>
+    <main id="workspace" tabindex="-1"></main>
 
-          <div class="section-heading spaced">
-            <p class="step">02</p>
-            <div><h2>Buying costs</h2><p>Enter quotes or sensible allowances. Tax is manual because circumstances vary.</p></div>
-          </div>
-          <div class="field-grid costs">
-            <label>Transaction tax <span class="money-field"><span aria-hidden="true">£</span><input id="tax" type="number" min="0" step="100" value="0" /></span></label>
-            <label>Legal &amp; searches <span class="money-field"><span aria-hidden="true">£</span><input id="legal" type="number" min="0" step="100" value="2500" /></span></label>
-            <label>Survey <span class="money-field"><span aria-hidden="true">£</span><input id="survey" type="number" min="0" step="100" value="900" /></span></label>
-            <label>Moving costs <span class="money-field"><span aria-hidden="true">£</span><input id="moving" type="number" min="0" step="100" value="1800" /></span></label>
-            <label>Immediate works <span class="money-field"><span aria-hidden="true">£</span><input id="works" type="number" min="0" step="500" value="10000" /></span></label>
-            <label>Monthly ownership buffer <span class="money-field"><span aria-hidden="true">£</span><input id="buffer" type="number" min="0" step="25" value="350" /></span></label>
-          </div>
-        </form>
+    <footer>
+      <p>Planning software, not financial, mortgage, legal or survey advice.</p>
+      <div>
+        <a href="https://github.com/MatthewPaver">Matthew Paver</a>
+        <span>·</span>
+        <a href="https://matthewpaver.github.io/">Software index</a>
+      </div>
+    </footer>
 
-        <aside class="results">
-          <p id="result-status" class="sr-only" aria-live="polite"></p>
-          <p class="result-kicker">Your first-pass picture</p>
-          <div class="primary-result">
-            <span>Estimated monthly mortgage</span>
-            <strong id="monthly">£0</strong>
-          </div>
-          <dl>
-            <div><dt>Mortgage required</dt><dd id="loan">£0</dd></div>
-            <div><dt>Loan-to-value</dt><dd id="ltv">0%</dd></div>
-            <div><dt>Cash needed at completion</dt><dd id="cash">£0</dd></div>
-            <div><dt>Monthly cost with buffer</dt><dd id="monthly-total">£0</dd></div>
-            <div><dt>Interest over full term</dt><dd id="interest">£0</dd></div>
-          </dl>
-          <div id="signal" class="signal"><span></span><p></p></div>
-          <button id="copy-summary" type="button">Copy a private summary</button>
-          <p id="copy-status" class="copy-status" role="status"></p>
-        </aside>
-      </section>
+    <div id="toast" role="status" aria-live="polite"></div>
 
-      <section class="explainers">
-        <article><span>Cash</span><h3>Budget beyond the deposit</h3><p>The completion figure combines your deposit with every buying-cost allowance above.</p></article>
-        <article><span>Debt</span><h3>Watch the LTV boundary</h3><p>A small price or deposit change can move the mortgage into a different lending band.</p></article>
-        <article><span>Resilience</span><h3>Keep a monthly buffer</h3><p>Mortgage payments are only one part of ownership. Add maintenance, insurance and service charges where relevant.</p></article>
-      </section>
-
-      <section class="disclaimer">
-        <h2>Useful, not financial advice.</h2>
-        <p>This is an illustrative calculator. It does not include lender fees, insurance, service charges or tax rules unless you enter them. Confirm affordability, taxes and mortgage terms with qualified professionals before making a commitment.</p>
-      </section>
-    </main>
-
-    <footer><span>Built by <a href="https://github.com/MatthewPaver">Matthew Paver</a></span><span>© <span id="year"></span> Winchester Buyer Check</span></footer>
+    <noscript>
+      <p class="noscript">This interactive demo requires JavaScript. No data is transmitted when it runs.</p>
+    </noscript>
     <script src="calculator.js"></script>
     <script src="app.js"></script>
   </body>
