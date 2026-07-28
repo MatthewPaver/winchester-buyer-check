@@ -40,10 +40,10 @@
             <div><h2>Purchase</h2><p>Start with the offer and cash you plan to contribute.</p></div>
           </div>
           <div class="field-grid">
-            <label>Purchase price <span class="money-field"><span>£</span><input id="price" type="number" min="10000" step="1000" value="450000" /></span></label>
-            <label>Deposit <span class="money-field"><span>£</span><input id="deposit" type="number" min="0" step="1000" value="67500" /></span></label>
-            <label>Mortgage rate <span class="suffix-field"><input id="rate" type="number" min="0" max="20" step="0.05" value="4.5" /><span>%</span></span></label>
-            <label>Mortgage term <span class="suffix-field"><input id="term" type="number" min="1" max="40" step="1" value="30" /><span>years</span></span></label>
+            <label>Purchase price <span class="money-field"><span aria-hidden="true">£</span><input id="price" type="number" min="10000" step="1000" value="450000" /></span></label>
+            <label>Deposit <span class="money-field"><span aria-hidden="true">£</span><input id="deposit" type="number" min="0" step="1000" value="67500" /></span></label>
+            <label>Mortgage rate <span class="suffix-field"><input id="rate" aria-label="Mortgage rate percentage" type="number" min="0" max="20" step="0.05" value="4.5" /><span aria-hidden="true">%</span></span></label>
+            <label>Mortgage term <span class="suffix-field"><input id="term" aria-label="Mortgage term in years" type="number" min="1" max="40" step="1" value="30" /><span aria-hidden="true">years</span></span></label>
           </div>
 
           <div class="section-heading spaced">
@@ -51,16 +51,17 @@
             <div><h2>Buying costs</h2><p>Enter quotes or sensible allowances. Tax is manual because circumstances vary.</p></div>
           </div>
           <div class="field-grid costs">
-            <label>Transaction tax <span class="money-field"><span>£</span><input id="tax" type="number" min="0" step="100" value="0" /></span></label>
-            <label>Legal &amp; searches <span class="money-field"><span>£</span><input id="legal" type="number" min="0" step="100" value="2500" /></span></label>
-            <label>Survey <span class="money-field"><span>£</span><input id="survey" type="number" min="0" step="100" value="900" /></span></label>
-            <label>Moving costs <span class="money-field"><span>£</span><input id="moving" type="number" min="0" step="100" value="1800" /></span></label>
-            <label>Immediate works <span class="money-field"><span>£</span><input id="works" type="number" min="0" step="500" value="10000" /></span></label>
-            <label>Monthly ownership buffer <span class="money-field"><span>£</span><input id="buffer" type="number" min="0" step="25" value="350" /></span></label>
+            <label>Transaction tax <span class="money-field"><span aria-hidden="true">£</span><input id="tax" type="number" min="0" step="100" value="0" /></span></label>
+            <label>Legal &amp; searches <span class="money-field"><span aria-hidden="true">£</span><input id="legal" type="number" min="0" step="100" value="2500" /></span></label>
+            <label>Survey <span class="money-field"><span aria-hidden="true">£</span><input id="survey" type="number" min="0" step="100" value="900" /></span></label>
+            <label>Moving costs <span class="money-field"><span aria-hidden="true">£</span><input id="moving" type="number" min="0" step="100" value="1800" /></span></label>
+            <label>Immediate works <span class="money-field"><span aria-hidden="true">£</span><input id="works" type="number" min="0" step="500" value="10000" /></span></label>
+            <label>Monthly ownership buffer <span class="money-field"><span aria-hidden="true">£</span><input id="buffer" type="number" min="0" step="25" value="350" /></span></label>
           </div>
         </form>
 
-        <aside class="results" aria-live="polite">
+        <aside class="results">
+          <p id="result-status" class="sr-only" aria-live="polite"></p>
           <p class="result-kicker">Your first-pass picture</p>
           <div class="primary-result">
             <span>Estimated monthly mortgage</span>
@@ -92,6 +93,7 @@
     </main>
 
     <footer><span>Built by <a href="https://github.com/MatthewPaver">Matthew Paver</a></span><span>© <span id="year"></span> Winchester Buyer Check</span></footer>
+    <script src="calculator.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
