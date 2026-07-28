@@ -1,7 +1,9 @@
 # Copyright notice
 
-Copyright © 2026 Matthew Paver. All rights reserved.
+Copyright © 2026 Matthew Paver.
 
-This repository is made publicly available so the hosted calculator can be inspected and used. No permission is granted to copy, modify, redistribute, sublicense or use this code or product identity commercially without prior written permission.
+The source code is available under the [MIT License](LICENSE). The
+"Winchester Buyer Check" name, visual identity and project artwork are not
+granted as trademarks by that software licence.
 
 The calculator is illustrative only and does not constitute financial, mortgage, tax or legal advice.
