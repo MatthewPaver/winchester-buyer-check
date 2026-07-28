@@ -35,4 +35,4 @@ The private commercial product adds authenticated accounts, persistent workspace
 
 The market view uses a small aggregated demonstration derived from HM Land Registry Price Paid Data under the Open Government Licence v3.0. It is not a live listing feed.
 
-Copyright © 2026 Matthew Paver. This repository is publicly viewable, but no open-source licence is granted. See [NOTICE.md](NOTICE.md).
+Copyright © 2026 Matthew Paver. Source code is available under the [MIT License](LICENSE); the project name and artwork are excluded — see [NOTICE.md](NOTICE.md).
