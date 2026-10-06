@@ -163,15 +163,11 @@ const homes = [
   },
 ];
 
-const marketRows = [
-  { area: "SO23", type: "Terraced", sales: 186, median: 430000, low: 365000, high: 507000 },
-  { area: "SO23", type: "Semi-detached", sales: 132, median: 535000, low: 438000, high: 660000 },
-  { area: "SO23", type: "Flat", sales: 214, median: 286000, low: 224000, high: 365000 },
-  { area: "SO22", type: "Terraced", sales: 154, median: 446000, low: 372000, high: 525000 },
-  { area: "SO22", type: "Semi-detached", sales: 183, median: 553000, low: 445000, high: 682000 },
-  { area: "SO21", type: "Terraced", sales: 91, median: 386000, low: 318000, high: 452000 },
-  { area: "SO21", type: "Detached", sales: 276, median: 724000, low: 548000, high: 965000 },
-];
+const marketData = window.WINCHESTER_MARKET_DATA;
+if (!marketData?.rows?.length) {
+  throw new Error("Generated Winchester market summary is missing");
+}
+const marketRows = marketData.rows;
 
 const evidenceTasks = [
   { id: "listing", label: "Listing facts confirmed against the agent source", source: "Agent listing" },
@@ -412,13 +408,20 @@ function bindHomeCards() {
 
 function renderMarket() {
   const maxMedian = Math.max(...marketRows.map((row) => row.median));
+  const coverage = marketData.coverage;
+  const filters = marketData.filters;
+  const generated = new Date(marketData.generatedAt).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
   workspace.innerHTML = `
     ${pageIntro("Research", "Winchester sold-price evidence", "Use completed sales to challenge an asking price; do not confuse them with live availability.")}
     <section class="feature-hero feature-hero--market">
       <div>
         <span class="section-kicker">HM Land Registry snapshot</span>
         <h1>See what homes actually sold for.</h1>
-        <p>A bundled 2024–2026 demo snapshot covers 2,389 Winchester-district transactions across SO21, SO22 and SO23.</p>
+        <p>${coverage.includedRecords.toLocaleString("en-GB")} of ${coverage.sourceRecords.toLocaleString("en-GB")} traced Winchester-district records meet the published filters, covering ${coverage.earliestSale} to ${coverage.latestSale}.</p>
       </div>
       <div class="source-stamp">${icon("shield")}<strong>Official completed-sale data</strong><span>Open Government Licence v3.0</span></div>
     </section>
@@ -432,7 +435,7 @@ function renderMarket() {
           ${marketRows
             .map(
               (row) => `<article data-market-row data-area="${row.area}" data-type="${row.type}">
-                <div><strong>${row.area} · ${row.type}</strong><span>${row.sales} completed sales in demo sample</span></div>
+                <div><strong>${row.area} · ${row.type}</strong><span>${row.sales} included completed sales</span></div>
                 <div class="bar-track"><span style="width:${Math.round((row.median / maxMedian) * 100)}%"></span></div>
                 <b>${formatMoney.format(row.median)}</b>
               </article>`,
@@ -449,7 +452,8 @@ function renderMarket() {
           <li>Adjust for condition, tenure, size and sale date.</li>
           <li>Keep listing claims separate from official completed sales.</li>
         </ol>
-        <p>Recent months are incomplete because registration can lag completion.</p>
+        <p>Historical 2025 sales, not live listings. Source snapshot retrieved ${generated}; registrations and corrections can change later releases. The nine example homes are fictional.</p>
+        <details><summary>Inclusion rules and retained source</summary><p>Category A and record-status A rows in the retained yearly file, four residential property types and prices from ${formatMoney.format(filters.priceRangeGbp[0])} to ${formatMoney.format(filters.priceRangeGbp[1])}. The displayed band is the 25th–75th percentile. <a href="data/price-paid-source.json">Inspect retained source and checksum</a> · <a href="docs/MARKET_DATA_CONTRACT.md">Read the data contract</a>.</p></details>
       </aside>
     </section>
     <section class="market-table-wrap">
@@ -457,7 +461,7 @@ function renderMarket() {
         <thead><tr><th>Area and type</th><th>Sales</th><th>Lower band</th><th>Median</th><th>Upper band</th></tr></thead>
         <tbody id="market-table">${marketRows
           .map(
-            (row) => `<tr data-market-row data-area="${row.area}" data-type="${row.type}"><th>${row.area} · ${row.type}</th><td>${row.sales}</td><td>${formatMoney.format(row.low)}</td><td><strong>${formatMoney.format(row.median)}</strong></td><td>${formatMoney.format(row.high)}</td></tr>`,
+            (row) => `<tr data-market-row data-area="${row.area}" data-type="${row.type}"><th>${row.area} · ${row.type}</th><td>${row.sales}</td><td>${formatMoney.format(row.p25)}</td><td><strong>${formatMoney.format(row.median)}</strong></td><td>${formatMoney.format(row.p75)}</td></tr>`,
           )
           .join("")}</tbody>
       </table>

@@ -55,6 +55,6 @@ test("static page exposes the full five-part demo workspace", () => {
   for (const route of ["homes", "market", "plan", "review", "evidence"]) {
     assert.match(html, new RegExp(`data-route="${route}"`));
   }
-  assert.match(html, /calculator\.js"><\/script>\s*<script src="app\.js/);
+  assert.match(html, /calculator\.js"><\/script>\s*<script src="market-data\.js"><\/script>\s*<script src="app\.js/);
   assert.match(html, /Nothing is uploaded or saved to a server/);
 });
