@@ -586,8 +586,8 @@ function renderReview() {
     </section>
     <section class="review-grid">
       <div class="review-column">
-        <div class="section-heading"><span class="section-kicker">Agent council</span><h2>What changes the decision</h2></div>
-        <div class="agent-list">
+        <div class="section-heading"><span class="section-kicker">Rule-based checks</span><h2>What changes the decision</h2></div>
+        <div class="rule-checks">
           <article><span>Finance</span><strong>${home.price === 450000 ? "Hard ceiling" : `${formatMoney.format(450000 - home.price)} below LISA cap`}</strong><p>${home.price === 450000 ? "Do not let an offer or fixture negotiation push the purchase price above the qualifying limit." : "Keep the remaining cash for fees, reserve and condition risk rather than treating it as bidding room."}</p></article>
           <article><span>Commute</span><strong>${home.station <= 15 ? "Strong station fit" : home.station <= 22 ? "Test the route" : "Material trade-off"}</strong><p>The model keeps the property-to-station leg separate from Winchester-to-Waterloo and the onward desk journey.</p></article>
           <article><span>Evidence</span><strong>${home.evidence >= 75 ? "Reviewable" : "Gaps remain"}</strong><p>${home.evidence >= 75 ? "Enough source coverage exists for a viewing decision, but not for an unconditional offer." : "Resolve title, condition or listing-fact gaps before relying on the score."}</p></article>

@@ -1250,11 +1250,11 @@ tbody td {
   margin-bottom: 0;
 }
 
-.agent-list {
+.rule-checks {
   margin-top: 22px;
 }
 
-.agent-list article {
+.rule-checks article {
   padding: 18px 0;
   display: grid;
   grid-template-columns: 80px 140px 1fr;
@@ -1262,18 +1262,18 @@ tbody td {
   border-top: 1px solid var(--line);
 }
 
-.agent-list span {
+.rule-checks span {
   color: var(--coral);
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.agent-list strong {
+.rule-checks strong {
   font-size: 12px;
 }
 
-.agent-list p {
+.rule-checks p {
   margin: 0;
   color: var(--muted);
   font-size: 11px;
@@ -1726,11 +1726,11 @@ footer a {
     border-right: 0;
   }
 
-  .agent-list article {
+  .rule-checks article {
     grid-template-columns: 80px 1fr;
   }
 
-  .agent-list p {
+  .rule-checks p {
     grid-column: 1 / -1;
   }
 

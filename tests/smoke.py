@@ -44,7 +44,7 @@ with sync_playwright() as playwright:
     page.get_by_role("link", name="Homes 9").click()
     page.get_by_role("button", name="Review Upper Brook Street").click()
     page.get_by_role("heading", name="Upper Brook Street").wait_for()
-    page.get_by_text("Agent council", exact=True).wait_for()
+    page.get_by_text("Rule-based checks", exact=True).wait_for()
 
     page.get_by_role("link", name="Evidence").click()
     page.get_by_text("40%", exact=True).wait_for()
