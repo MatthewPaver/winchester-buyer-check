@@ -1,8 +1,10 @@
 # Winchester House Hunter — public demo
 
-A browser-only demonstration of the fuller Winchester property decision workspace.
+A browser-only Winchester first-time-buyer decision demo.
 
 **Live demo:** https://matthewpaver.github.io/winchester-buyer-check/
+
+![Winchester House Hunter: seeded shortlist home screen](docs/assets/screenshot.png)
 
 **Try first:** choose **Under £425k**, open a home and inspect its evidence checklist. Then change the affordability inputs to see how the example responds. No sign-up or installation is required. The shortlist is seeded: you cannot use this edition to search live property listings or add a new listing feed.
 
@@ -11,7 +13,7 @@ The demo includes:
 - a searchable nine-home shortlist;
 - a generated, traceable HM Land Registry market view;
 - a LISA-aware affordability plan;
-- property review, agent verdict and negotiation views;
+- property review with rule-based decision checks (fixed thresholds on price, commute and evidence — no AI or LLM) and a negotiation view;
 - an evidence checklist and source register.
 
 All examples are seeded. Inputs and checklist changes remain in the browser. The demo does not create an account, scrape live property portals, make a mortgage decision or submit an offer.
@@ -63,7 +65,7 @@ node --test tests/*.test.cjs
 
 The [HMLR yearly download](https://www.gov.uk/government/statistical-data-sets/price-paid-data-yearly-file) is revised monthly. The retained snapshot was retrieved on **5 September 2026**; the source JSON records the download URL and whole-download SHA-256. A future download may produce different records and must be reviewed as a new snapshot. The projection retains only transaction ID, price, date, outward postcode, property type, category and record-status code. It reads no private inputs. See [the data contract](docs/MARKET_DATA_CONTRACT.md) for exact filters and counts.
 
-The private commercial product adds authenticated accounts, persistent workspaces, source ingestion, background jobs and administrative controls. Those services are deliberately not exposed by this static GitHub Pages edition.
+An earlier private prototype (now archived) explored authenticated accounts, persistent workspaces, source ingestion and background jobs. None of that is part of this static GitHub Pages edition, which deliberately has no backend.
 
 ## Data and rights
 
