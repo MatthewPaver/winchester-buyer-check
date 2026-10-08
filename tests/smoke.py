@@ -4,7 +4,7 @@ import os
 from playwright.sync_api import sync_playwright
 
 
-OUTPUT = Path("/tmp/winchester-house-hunter.png")
+OUTPUT = Path("/tmp/winchester-buyer-check.png")
 SHOWCASE = Path(os.environ.get("WINCHESTER_SHOWCASE_PATH", "/tmp/winchester-showcase.png"))
 BASE_URL = os.environ.get("WINCHESTER_BASE_URL", "http://127.0.0.1:8765")
 
@@ -19,8 +19,8 @@ with sync_playwright() as playwright:
     page.goto(BASE_URL)
     page.wait_for_load_state("networkidle")
 
-    assert page.title() == "Winchester House Hunter · Interactive demo"
-    page.get_by_role("heading", name="Homes worth a closer look.").wait_for()
+    assert page.title() == "Winchester Buyer Check · Interactive demo"
+    page.get_by_role("heading", name="Compare your shortlisted homes").wait_for()
     assert page.locator(".home-card").count() == 9
 
     showcase = browser.new_page(viewport={"width": 1200, "height": 675})
@@ -30,7 +30,7 @@ with sync_playwright() as playwright:
     showcase.close()
 
     page.get_by_role("link", name="Market").click()
-    page.get_by_role("heading", name="See what homes actually sold for.").wait_for()
+    page.get_by_role("heading", name="2025 sold prices by area and property type").wait_for()
     assert "931 of 1,046" in page.locator(".feature-hero--market").inner_text()
     assert "2025-01-02 to 2025-12-24" in page.locator(".feature-hero--market").inner_text()
     page.get_by_label("Postcode area").select_option("SO23")
@@ -61,7 +61,7 @@ with sync_playwright() as playwright:
     mobile.wait_for_load_state("networkidle")
     assert mobile.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth")
     mobile.get_by_role("link", name="Plan").click()
-    mobile.get_by_role("heading", name="Find the usable ceiling.").wait_for()
+    mobile.get_by_role("heading", name="Work out your maximum price").wait_for()
     assert not errors, errors
     browser.close()
 

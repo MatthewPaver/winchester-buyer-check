@@ -33,7 +33,7 @@ const homes = [
     evidence: 74,
     soldBand: "£379k–£418k",
     verdict: "Good value",
-    note: "More space for the money, offset by a commute that needs a real door-to-platform test.",
+    note: "More space for the money. Walk the 22-minute route to the station before you decide.",
   },
   {
     id: "gordon-avenue",
@@ -51,7 +51,7 @@ const homes = [
     evidence: 68,
     soldBand: "£382k–£410k",
     verdict: "Worth viewing",
-    note: "A balanced candidate if the slower station journey is acceptable and the source facts check out.",
+    note: "Worth viewing if a 24-minute station walk suits you and the listing facts check out.",
   },
   {
     id: "imber-road",
@@ -69,7 +69,7 @@ const homes = [
     evidence: 72,
     soldBand: "£351k–£391k",
     verdict: "Budget leader",
-    note: "The largest cash cushion in the set, but condition and works need a disciplined inspection.",
+    note: "The cheapest home here, so it leaves the most cash spare. Check the condition and works carefully.",
   },
   {
     id: "eastcliffe",
@@ -87,7 +87,7 @@ const homes = [
     evidence: 78,
     soldBand: "£426k–£462k",
     verdict: "Cap-sensitive",
-    note: "A credible commute candidate, but there is no room to bid above the LISA ceiling.",
+    note: "A 15-minute station walk. It is priced at the LISA cap, so you cannot offer more.",
   },
   {
     id: "fulflood",
@@ -123,7 +123,7 @@ const homes = [
     evidence: 75,
     soldBand: "£397k–£432k",
     verdict: "Commute trade-off",
-    note: "Good space and an affordable asking price, but the station leg materially weakens the fit.",
+    note: "Good space at an affordable price. The 38-minute walk to the station lowers the score.",
   },
   {
     id: "canon-street",
@@ -141,7 +141,7 @@ const homes = [
     evidence: 59,
     soldBand: "£432k–£466k",
     verdict: "Verify first",
-    note: "At the hard cap with limited outside space, so evidence quality and condition must be unusually strong.",
+    note: "Priced at the £450k cap with only a patio. Check the evidence and condition before going further.",
   },
   {
     id: "hyde-edge",
@@ -159,7 +159,7 @@ const homes = [
     evidence: 63,
     soldBand: "£425k–£468k",
     verdict: "Works risk",
-    note: "High potential, but works pressure and the LISA ceiling leave little tolerance for surprises.",
+    note: "Three bedrooms at the £450k cap. It needs works, which leaves no budget for surprises.",
   },
 ];
 
@@ -327,17 +327,16 @@ function homeCards() {
 
 function renderHomes() {
   workspace.innerHTML = `
-    ${pageIntro("Browse", `${homes.length} homes in your shortlist`, "Compare the whole shortlist and open only the homes that earn attention.")}
+    ${pageIntro("Homes", `${homes.length} homes in your shortlist`, "Filter the shortlist, then open a home to review it.")}
     <section class="feature-hero feature-hero--homes">
       <div>
-        <span class="section-kicker">Your Winchester search</span>
-        <h1>Homes worth a closer look.</h1>
-        <p>Price, station walk, layout and evidence are visible before a listing becomes an emotional decision.</p>
+        <h1>Compare your shortlisted homes</h1>
+        <p>Each card shows the asking price, walk to the station, layout and an evidence score for how well sources back the listing.</p>
       </div>
       <dl class="hero-metrics">
         <div><dt>Saved homes</dt><dd>${homes.length}</dd></div>
         <div><dt>Within LISA cap</dt><dd>${homes.filter((home) => home.price <= 450000).length}</dd></div>
-        <div><dt>Fast station walk</dt><dd>${homes.filter((home) => home.station <= 15).length}</dd></div>
+        <div><dt>Station ≤15 min</dt><dd>${homes.filter((home) => home.station <= 15).length}</dd></div>
         <div><dt>Evidence ≥75%</dt><dd>${homes.filter((home) => home.evidence >= 75).length}</dd></div>
       </dl>
     </section>
@@ -416,11 +415,11 @@ function renderMarket() {
     year: "numeric",
   });
   workspace.innerHTML = `
-    ${pageIntro("Research", "Winchester sold-price evidence", "Use completed sales to challenge an asking price; do not confuse them with live availability.")}
+    ${pageIntro("Market", "Winchester sold prices", "Completed 2025 sales to compare against an asking price. None of these homes is for sale now.")}
     <section class="feature-hero feature-hero--market">
       <div>
         <span class="section-kicker">HM Land Registry snapshot</span>
-        <h1>See what homes actually sold for.</h1>
+        <h1>2025 sold prices by area and property type</h1>
         <p>${coverage.includedRecords.toLocaleString("en-GB")} of ${coverage.sourceRecords.toLocaleString("en-GB")} traced Winchester-district records meet the published filters, covering ${coverage.earliestSale} to ${coverage.latestSale}.</p>
       </div>
       <div class="source-stamp">${icon("shield")}<strong>Official completed-sale data</strong><span>Open Government Licence v3.0</span></div>
@@ -444,15 +443,14 @@ function renderMarket() {
         </div>
       </div>
       <aside class="market-note">
-        <span class="section-kicker">How to use it</span>
-        <h2>Challenge the listing, not the buyer.</h2>
+        <h2>Using these prices</h2>
         <ol>
           <li>Start with the closest property type and postcode.</li>
-          <li>Check the spread, not only the median.</li>
+          <li>Look at the full price band as well as the median.</li>
           <li>Adjust for condition, tenure, size and sale date.</li>
           <li>Keep listing claims separate from official completed sales.</li>
         </ol>
-        <p>Historical 2025 sales, not live listings. Source snapshot retrieved ${generated}; registrations and corrections can change later releases. The nine example homes are fictional.</p>
+        <p>These are completed 2025 sales. Source snapshot retrieved ${generated}; registrations and corrections can change later releases. The nine example homes are fictional.</p>
         <details><summary>Inclusion rules and retained source</summary><p>Category A and record-status A rows in the retained yearly file, four residential property types and prices from ${formatMoney.format(filters.priceRangeGbp[0])} to ${formatMoney.format(filters.priceRangeGbp[1])}. The displayed band is the 25th–75th percentile. <a href="data/price-paid-source.json">Inspect retained source and checksum</a> · <a href="docs/MARKET_DATA_CONTRACT.md">Read the data contract</a>.</p></details>
       </aside>
     </section>
@@ -506,21 +504,20 @@ function planResults() {
       </dl>
     </div>
     <div class="scenario-grid">
-      <article><span>Bare completion</span><strong>${formatMoney.format(Math.min(450000, result.borrowingCapacity + state.plan.deposit - state.plan.fees))}</strong><p>Fees included; no reserve or works allowance.</p></article>
+      <article><span>Purchase and fees</span><strong>${formatMoney.format(Math.min(450000, result.borrowingCapacity + state.plan.deposit - state.plan.fees))}</strong><p>Fees included; no reserve or works allowance.</p></article>
       <article><span>With reserve</span><strong>${formatMoney.format(Math.min(450000, result.borrowingCapacity + state.plan.deposit - state.plan.fees - state.plan.reserve))}</strong><p>Keeps ${formatMoney.format(state.plan.reserve)} after completion.</p></article>
-      <article class="active"><span>Make it mine</span><strong>${formatMoney.format(result.modelledMaxPrice)}</strong><p>Reserve plus ${formatMoney.format(state.plan.works)} first-year works.</p></article>
+      <article class="active"><span>Reserve and works</span><strong>${formatMoney.format(result.modelledMaxPrice)}</strong><p>Reserve plus ${formatMoney.format(state.plan.works)} first-year works.</p></article>
     </div>
   `;
 }
 
 function renderPlan() {
   workspace.innerHTML = `
-    ${pageIntro("Plan", "Your buying plan", "Test price, borrowing, cash reserve and works together rather than treating the deposit as the whole decision.")}
+    ${pageIntro("Plan", "Your buying plan", "Enter the price, borrowing, cash reserve and works costs to see what you can afford.")}
     <section class="feature-hero feature-hero--plan">
       <div>
-        <span class="section-kicker">Affordability lab</span>
-        <h1>Find the usable ceiling.</h1>
-        <p>The £450,000 LISA limit is only the outer edge. Borrowing, fees, reserve and first-year works determine the safer number.</p>
+        <h1>Work out your maximum price</h1>
+        <p>You can only use a Lifetime ISA on a home costing £450,000 or less. Your borrowing, fees, reserve and first-year works may set a lower limit.</p>
       </div>
       <div class="source-stamp">${icon("shield")}<strong>Runs in this browser</strong><span>Inputs are not transmitted</span></div>
     </section>
@@ -565,7 +562,7 @@ function renderReview() {
   const home = selectedHome();
   const offer = reviewSummary(home);
   workspace.innerHTML = `
-    ${pageIntro("Review", home.name, "Affordability, source quality, viewing checks and negotiation in one decision record.")}
+    ${pageIntro("Review", home.name, "Affordability, sources, viewing checks and an offer range for this home.")}
     <section class="review-hero">
       <div class="review-art">${homeArtwork(home, homes.indexOf(home))}</div>
       <div class="review-title">
@@ -586,22 +583,21 @@ function renderReview() {
     </section>
     <section class="review-grid">
       <div class="review-column">
-        <div class="section-heading"><span class="section-kicker">Rule-based checks</span><h2>What changes the decision</h2></div>
+        <div class="section-heading"><span class="section-kicker">Rule-based checks</span><h2>Finance, commute and evidence</h2></div>
         <div class="rule-checks">
-          <article><span>Finance</span><strong>${home.price === 450000 ? "Hard ceiling" : `${formatMoney.format(450000 - home.price)} below LISA cap`}</strong><p>${home.price === 450000 ? "Do not let an offer or fixture negotiation push the purchase price above the qualifying limit." : "Keep the remaining cash for fees, reserve and condition risk rather than treating it as bidding room."}</p></article>
-          <article><span>Commute</span><strong>${home.station <= 15 ? "Strong station fit" : home.station <= 22 ? "Test the route" : "Material trade-off"}</strong><p>The model keeps the property-to-station leg separate from Winchester-to-Waterloo and the onward desk journey.</p></article>
-          <article><span>Evidence</span><strong>${home.evidence >= 75 ? "Reviewable" : "Gaps remain"}</strong><p>${home.evidence >= 75 ? "Enough source coverage exists for a viewing decision, but not for an unconditional offer." : "Resolve title, condition or listing-fact gaps before relying on the score."}</p></article>
+          <article><span>Finance</span><strong>${home.price === 450000 ? "Hard ceiling" : `${formatMoney.format(450000 - home.price)} below LISA cap`}</strong><p>${home.price === 450000 ? "Do not let an offer or fixture negotiation push the purchase price above the qualifying limit." : "Keep the remaining cash for fees, reserve and repairs. Don't spend it on a higher offer."}</p></article>
+          <article><span>Commute</span><strong>${home.station <= 15 ? "Short walk" : home.station <= 22 ? "Test the route" : "Long walk"}</strong><p>This scores the walk to Winchester station only. The train to Waterloo and the rest of the journey sit outside the check.</p></article>
+          <article><span>Evidence</span><strong>${home.evidence >= 75 ? "Reviewable" : "Gaps remain"}</strong><p>${home.evidence >= 75 ? "The sources cover enough to decide on a viewing. Confirm the rest before you make an offer." : "Fill the title, condition or listing gaps before you rely on the score."}</p></article>
         </div>
       </div>
       <aside class="negotiation-card">
-        <span class="section-kicker">Negotiation frame</span>
-        <h2>Keep an evidence-led range.</h2>
+        <h2>Offer range</h2>
         <dl>
           <div><dt>Opening position</dt><dd>${formatMoney.format(offer.opening)}</dd></div>
           <div><dt>Target deal</dt><dd>${formatMoney.format(offer.offerTarget)}</dd></div>
           <div><dt>Walk-away price</dt><dd>${formatMoney.format(offer.walkAway)}</dd></div>
         </dl>
-        <p>Illustrative planning range only. A survey, broker and conveyancer must replace assumptions with verified facts.</p>
+        <p>An illustrative range from the demo rules. A survey, broker and conveyancer need to confirm the facts before you offer.</p>
         <button type="button" id="copy-review">Copy review summary</button>
         <button type="button" class="secondary" id="mark-viewing">Mark ready for viewing</button>
       </aside>
@@ -613,7 +609,7 @@ function renderReview() {
     renderReview();
   });
   document.getElementById("copy-review").addEventListener("click", async () => {
-    const text = `${home.name}\n${formatMoney.format(home.price)} · ${home.score}/100 · ${home.verdict}\nStation ${home.station} min · Evidence ${home.evidence}%\nTarget deal ${formatMoney.format(offer.offerTarget)}\n\nSeeded Winchester House Hunter demo. Verify all facts before acting.`;
+    const text = `${home.name}\n${formatMoney.format(home.price)} · ${home.score}/100 · ${home.verdict}\nStation ${home.station} min · Evidence ${home.evidence}%\nTarget deal ${formatMoney.format(offer.offerTarget)}\n\nSeeded Winchester Buyer Check demo. Verify all facts before acting.`;
     try {
       await navigator.clipboard.writeText(text);
       showToast("Review summary copied");
@@ -628,18 +624,17 @@ function renderEvidence() {
   const complete = evidenceTasks.filter((task) => state.evidence.includes(task.id)).length;
   const readiness = Math.round((complete / evidenceTasks.length) * 100);
   workspace.innerHTML = `
-    ${pageIntro("Verify", "Evidence centre", "Keep official records, source claims and buyer observations separate before relying on a recommendation.")}
+    ${pageIntro("Evidence", "Evidence checklist", "Official records, agent claims and your own checks, listed separately.")}
     <section class="feature-hero feature-hero--evidence">
       <div>
-        <span class="section-kicker">Decision record</span>
-        <h1>Know what is fact, inference and still missing.</h1>
-        <p>The demo models provenance and gaps rather than turning a thin listing into a confident recommendation.</p>
+        <h1>Confirmed facts, assumptions and gaps</h1>
+        <p>The demo records where each fact came from and which checks are still open.</p>
       </div>
       <div class="readiness-ring" style="--readiness:${readiness * 3.6}deg"><span><strong id="readiness-value">${readiness}%</strong>review ready</span></div>
     </section>
     <section class="evidence-layout">
       <div>
-        <div class="section-heading"><span class="section-kicker">Checks for ${selectedHome().name}</span><h2>Before the viewing decision</h2></div>
+        <div class="section-heading"><h2>Checks for ${selectedHome().name}</h2></div>
         <div class="check-list" id="evidence-checks">
           ${evidenceTasks
             .map(
@@ -653,8 +648,7 @@ function renderEvidence() {
         </div>
       </div>
       <aside class="source-register">
-        <span class="section-kicker">Source register</span>
-        <h2>Four different levels of reliance.</h2>
+        <h2>Sources and how far to rely on them</h2>
         <article><b class="source-dot official"></b><div><strong>HM Land Registry</strong><span>Official · completed sales · bundled demo snapshot</span></div><em>High</em></article>
         <article><b class="source-dot supplied"></b><div><strong>Agent listing</strong><span>Supplied claim · current availability requires recheck</span></div><em>Medium</em></article>
         <article><b class="source-dot model"></b><div><strong>Affordability model</strong><span>Calculated from explicit buyer assumptions</span></div><em>Inspect</em></article>
@@ -663,7 +657,7 @@ function renderEvidence() {
     </section>
     <section class="boundary-note">
       ${icon("shield")}
-      <div><strong>Demo boundary</strong><p>No live portal scraping, customer account, mortgage decision or offer is created here. Checklist changes stay in this browser.</p></div>
+      <div><strong>Demo boundary</strong><p>The demo does not scrape listing sites, create accounts, make mortgage decisions or send offers. Checklist changes stay in this browser.</p></div>
     </section>
   `;
   document.querySelectorAll("#evidence-checks input").forEach((input) => {
