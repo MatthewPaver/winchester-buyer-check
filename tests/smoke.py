@@ -16,6 +16,8 @@ with sync_playwright() as playwright:
     page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.on("requestfailed", lambda request: errors.append(f"Failed request: {request.url}"))
+    # Privacy: every request stays on this site (fonts are self-hosted, no CDNs or analytics).
+    page.on("request", lambda request: None if request.url.startswith(BASE_URL) else errors.append(f"Third-party request: {request.url}"))
     page.goto(BASE_URL)
     page.wait_for_load_state("networkidle")
 
@@ -23,21 +25,37 @@ with sync_playwright() as playwright:
     page.get_by_role("heading", name="Saved homes in Winchester").wait_for()
     assert page.locator(".home-card").count() == 9
 
+    # Default sort puts the homes within the plan first; the fit score explains itself once.
+    assert "within it" in page.locator(".plan-summary").inner_text()
+    assert page.get_by_role("button", name="Review Imber Road").is_visible()
+    assert page.locator(".home-card").first.get_by_text("Imber Road, SO23").is_visible()
+    page.get_by_text("What is the fit score?").click()
+    page.get_by_text("measured against a fixed yardstick", exact=False).wait_for()
+    assert page.locator(".ranking-note").inner_text().startswith("Ranking")
+    page.get_by_role("button", name="Within my plan", exact=True).click()
+    assert page.locator(".home-card").count() == 1
+    page.get_by_role("button", name="All homes", exact=True).click()
+
     showcase = browser.new_page(viewport={"width": 1200, "height": 675})
     showcase.goto(BASE_URL)
     showcase.wait_for_load_state("networkidle")
     showcase.screenshot(path=str(SHOWCASE), animations="disabled")
     showcase.close()
 
-    page.get_by_role("link", name="Market").click()
+    page.get_by_role("link", name="Market", exact=True).click()
     page.get_by_role("heading", name="2025 sold prices by area and property type").wait_for()
     assert "931 of 1,046" in page.locator(".page-head").inner_text()
     assert "2 Jan 2025 to 24 Dec 2025" in page.locator(".page-head").inner_text()
+    assert page.locator(".range-bar").count() == 12
+    assert page.locator(".plan-line").count() == 12
     page.get_by_label("Postcode area").select_option("SO23")
     # Four generated property groups appear once in the chart and once in the table.
     assert page.locator("[data-market-row]:not([hidden])").count() == 8
 
-    page.get_by_role("link", name="Plan").click()
+    page.get_by_role("link", name="Plan", exact=True).click()
+    page.get_by_role("heading", name="Money needed on the day").wait_for()
+    page.get_by_text("First-time buyer relief applied").first.wait_for()
+    page.get_by_role("heading", name="Lifetime ISA rules").wait_for()
     page.get_by_label("Asking price").fill("460000")
     page.get_by_text("Over the Lifetime ISA limit", exact=True).wait_for()
 
@@ -45,9 +63,18 @@ with sync_playwright() as playwright:
     page.get_by_role("button", name="Review Upper Brook Street").click()
     page.get_by_role("heading", name="Upper Brook Street").wait_for()
     page.get_by_role("heading", name="Checks on finance, commute and evidence").wait_for()
+    page.get_by_role("heading", name="Money needed on the day").wait_for()
+    # Over budget: the offer card offers a next step instead of a copy button.
+    assert page.get_by_role("link", name="Change my plan").is_visible()
+    page.get_by_role("button", name="Show homes I can afford").click()
+    page.get_by_role("heading", name="Saved homes in Winchester").wait_for()
+    assert page.locator(".home-card").count() == 1
 
-    page.get_by_role("link", name="Evidence").click()
-    page.get_by_text("40%", exact=True).wait_for()
+    page.get_by_role("link", name="Evidence", exact=True).click()
+    page.get_by_role("heading", name="Always needed").wait_for()
+    page.get_by_text("2 of 17", exact=True).wait_for()
+    page.get_by_text("Council tax band", exact=True).click()
+    page.get_by_text("3 of 17", exact=True).wait_for()
     page.get_by_text("Survey and title", exact=True).wait_for()
 
     assert page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth")
@@ -60,7 +87,9 @@ with sync_playwright() as playwright:
     mobile.goto(BASE_URL)
     mobile.wait_for_load_state("networkidle")
     assert mobile.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth")
-    mobile.get_by_role("link", name="Plan").click()
+    # The first home's price is visible without scrolling on a phone.
+    assert mobile.locator(".listing-price").first.bounding_box()["y"] + 30 < 844
+    mobile.get_by_role("link", name="Plan", exact=True).click()
     mobile.get_by_role("heading", name="Work out your maximum price").wait_for()
     assert not errors, errors
     browser.close()

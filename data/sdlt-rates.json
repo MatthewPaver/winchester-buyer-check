@@ -1,0 +1,48 @@
+{
+  "name": "Stamp Duty Land Tax: residential property rates",
+  "appliesTo": "Residential property in England and Northern Ireland, for a buyer who will own one home after the purchase. Scotland and Wales have different taxes.",
+  "effectiveFrom": "2025-04-01",
+  "lastVerified": "2026-10-28",
+  "sources": [
+    {
+      "title": "Stamp Duty Land Tax: Residential property rates",
+      "url": "https://www.gov.uk/stamp-duty-land-tax/residential-property-rates"
+    },
+    {
+      "title": "Stamp Duty Land Tax relief for land or property transactions (First-Time Buyers' Relief), updated 9 July 2025",
+      "url": "https://www.gov.uk/guidance/stamp-duty-land-tax-relief-for-land-or-property-transactions"
+    },
+    {
+      "title": "Stamp Duty Land Tax (England and Northern Ireland, return and payment within 14 days of completion)",
+      "url": "https://www.gov.uk/stamp-duty-land-tax"
+    }
+  ],
+  "standard": {
+    "description": "Rates on the portion of the price within each band.",
+    "bands": [
+      { "upTo": 125000, "ratePercent": 0 },
+      { "upTo": 250000, "ratePercent": 2 },
+      { "upTo": 925000, "ratePercent": 5 },
+      { "upTo": 1500000, "ratePercent": 10 },
+      { "upTo": null, "ratePercent": 12 }
+    ]
+  },
+  "firstTimeBuyerRelief": {
+    "description": "For buyers who are all first-time buyers and intend to live in the home as their main residence.",
+    "maxPrice": 500000,
+    "aboveMaxPrice": "Above £500,000 the relief cannot be claimed and the standard rates apply to the whole price.",
+    "bands": [
+      { "upTo": 300000, "ratePercent": 0 },
+      { "upTo": 500000, "ratePercent": 5 }
+    ]
+  },
+  "notModelled": [
+    "The 5% higher rates when you will own more than one home after buying.",
+    "The 2% surcharge for buyers who are not UK resident.",
+    "Shared ownership, new leases and non-residential or mixed-use property."
+  ],
+  "workedExamplesFromSource": [
+    { "price": 295000, "firstTimeBuyer": false, "tax": 4750 },
+    { "price": 500000, "firstTimeBuyer": true, "tax": 10000 }
+  ]
+}

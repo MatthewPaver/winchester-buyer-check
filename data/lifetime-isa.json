@@ -1,0 +1,32 @@
+{
+  "name": "Lifetime ISA: rules for buying a first home",
+  "lastVerified": "2026-10-28",
+  "sources": [
+    {
+      "title": "Lifetime ISA",
+      "url": "https://www.gov.uk/lifetime-isa"
+    },
+    {
+      "title": "Lifetime ISA: withdrawing money from your Lifetime ISA",
+      "url": "https://www.gov.uk/lifetime-isa/withdrawing-money-from-your-lifetime-isa"
+    },
+    {
+      "title": "First Time Buyer ISA: consultation (HM Treasury, updated 29 June 2026)",
+      "url": "https://www.gov.uk/government/consultations/first-time-buyer-isa-consultation/first-time-buyer-isa-consultation"
+    }
+  ],
+  "priceLimit": 450000,
+  "maxContributionPerYear": 4000,
+  "bonusRatePercent": 25,
+  "maxBonusPerYear": 1000,
+  "monthsAfterFirstPayment": 12,
+  "withdrawalChargePercent": 25,
+  "rules": [
+    "The home must cost £450,000 or less.",
+    "You must buy at least 12 months after your first payment into the Lifetime ISA.",
+    "You must buy with a mortgage and use a conveyancer or solicitor.",
+    "The government adds a 25% bonus to what you pay in: up to £4,000 a year, so up to £1,000 bonus a year.",
+    "If you take money out for any other reason before age 60, you pay a 25% withdrawal charge."
+  ],
+  "pendingChange": "In June 2026 the government consulted on replacing the Lifetime ISA with a First Time Buyer ISA. No launch date is set. Until then you can still open a Lifetime ISA, and existing accounts keep the current rules."
+}
