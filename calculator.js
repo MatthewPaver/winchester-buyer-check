@@ -86,10 +86,25 @@
     return { ...result, atLisaLimit, level, lisaBlocked, tone };
   }
 
+  // Illustrative offer range for one home, never above what the buyer's plan allows.
+  // home: { price, evidence }; budgetMax: the plan's most you can pay for this home.
+  function offerRange(home, budgetMax) {
+    const roundTo500 = (value) => Math.round(value / 500) * 500;
+    const price = nonNegative(home.price);
+    const target = Math.min(price, roundTo500(price * (home.evidence < 65 ? 0.95 : 0.975)));
+    const opening = roundTo500(target * 0.975);
+    const walkAway = Math.min(LISA_PRICE_LIMIT, price + (price < 430000 ? 5000 : 0));
+    const cap = Number.isFinite(budgetMax) ? Math.max(0, Math.floor(budgetMax)) : Infinity;
+    if (opening > cap) return { outOfReach: true, budgetMax: cap, suggestedOpening: opening };
+    const capped = { opening, offerTarget: Math.min(target, cap), walkAway: Math.min(walkAway, cap) };
+    return { ...capped, outOfReach: false, budgetMax: cap, cappedAtBudget: capped.walkAway < walkAway || capped.offerTarget < target };
+  }
+
   return {
     LISA_PRICE_LIMIT,
     TIGHT_HEADROOM,
     assessBudget,
+    offerRange,
     calculateAffordability,
     calculatePurchase,
     monthlyPayment,

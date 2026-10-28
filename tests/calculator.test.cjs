@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 
-const { assessBudget, calculateAffordability, calculatePurchase } = require("../calculator.js");
+const { assessBudget, calculateAffordability, calculatePurchase, offerRange } = require("../calculator.js");
 
 const standard = {
   price: 450000,
@@ -113,4 +113,22 @@ test("static page exposes the full five-part demo workspace", () => {
   }
   assert.match(html, /calculator\.js"><\/script>\s*<script src="market-data\.js"><\/script>\s*<script src="app\.js/);
   assert.match(html, /Nothing you enter leaves this browser/);
+});
+
+test("offer range never goes above what the plan allows", () => {
+  const home = { price: 400000, evidence: 82 };
+  const open = offerRange(home, Infinity);
+  assert.deepEqual([open.opening, open.offerTarget, open.walkAway], [380500, 390000, 405000]);
+  assert.equal(open.cappedAtBudget, false);
+
+  const capped = offerRange(home, 395000);
+  assert.equal(capped.outOfReach, false);
+  assert.equal(capped.walkAway, 395000);
+  assert.equal(capped.offerTarget, 390000);
+  assert.equal(capped.cappedAtBudget, true);
+
+  const outOfReach = offerRange(home, assessBudget(examplePlan, 400000).modelledMaxPrice);
+  assert.equal(outOfReach.outOfReach, true);
+  assert.equal(outOfReach.budgetMax, 377500);
+  assert.equal(outOfReach.suggestedOpening, 380500);
 });

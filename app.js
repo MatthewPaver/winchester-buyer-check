@@ -631,10 +631,10 @@ function renderPlan() {
   });
 }
 
+// Offer range capped at what the current plan allows for this home.
 function reviewSummary(home) {
-  const offerTarget = Math.min(home.price, Math.round((home.price * (home.evidence < 65 ? 0.95 : 0.975)) / 500) * 500);
-  const opening = Math.round((offerTarget * 0.975) / 500) * 500;
-  return { offerTarget, opening, walkAway: Math.min(LISA_LIMIT, home.price + (home.price < 430000 ? 5000 : 0)) };
+  const budget = window.BuyerCalculator.assessBudget(state.plan, home.price);
+  return window.BuyerCalculator.offerRange(home, budget.modelledMaxPrice);
 }
 
 // Finance check for one home: the plan's verdict first, the Lifetime ISA limit only when it matters.
@@ -709,12 +709,14 @@ function renderReview() {
       </div>
       <aside class="negotiation-card">
         <h2>Offer range</h2>
-        <dl>
+        ${offer.outOfReach
+          ? `<p class="offer-out-of-reach"><strong>No offer range within your budget.</strong> Your plan allows up to ${formatMoney.format(offer.budgetMax)}, which is below a sensible opening offer of ${formatMoney.format(offer.suggestedOpening)} for this home. Change the plan or look at cheaper homes.</p>`
+          : `<dl>
           <div><dt>Opening offer</dt><dd>${formatMoney.format(offer.opening)}</dd></div>
           <div><dt>Price to aim for</dt><dd>${formatMoney.format(offer.offerTarget)}</dd></div>
           <div><dt>Walk-away price</dt><dd>${formatMoney.format(offer.walkAway)}</dd></div>
-        </dl>
-        <p>An illustrative range from the example's rules. A survey, broker and conveyancer need to confirm the facts before you offer.</p>
+        </dl>${offer.cappedAtBudget ? `<p class="offer-capped">Capped at your budget of ${formatMoney.format(offer.budgetMax)}.</p>` : ""}`}
+        <p>An illustrative range from the example's rules, never above what your plan allows. A survey, broker and conveyancer need to confirm the facts before you offer.</p>
         <button type="button" id="copy-review">Copy review summary</button>
         <button type="button" class="secondary" id="mark-viewing">Mark ready for viewing</button>
       </aside>
@@ -726,7 +728,7 @@ function renderReview() {
     renderReview();
   });
   document.getElementById("copy-review").addEventListener("click", async () => {
-    const text = `${home.name}, ${home.postcode}\n${formatMoney.format(home.price)}. Fit score ${home.score} out of 100: ${home.verdict}.\nYour budget: ${finance.headline}.\nWalk to station: ${home.station} min. Facts confirmed: ${home.evidence}%.\nPrice to aim for: ${formatMoney.format(offer.offerTarget)}.\n\nExample from Winchester Buyer Check. Check all facts before acting.`;
+    const text = `${home.name}, ${home.postcode}\n${formatMoney.format(home.price)}. Fit score ${home.score} out of 100: ${home.verdict}.\nYour budget: ${finance.headline}.\nWalk to station: ${home.station} min. Facts confirmed: ${home.evidence}%.\n${offer.outOfReach ? `No offer range within your budget (up to ${formatMoney.format(offer.budgetMax)}).` : `Price to aim for: ${formatMoney.format(offer.offerTarget)}.`}\n\nExample from Winchester Buyer Check. Check all facts before acting.`;
     try {
       await navigator.clipboard.writeText(text);
       showToast("Review summary copied");
