@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="A seeded, browser-only demo of Winchester Buyer Check: compare homes, check 2025 sold prices and test a buying plan."
+      content="Winchester Buyer Check: compare nine example homes for a first-time buyer, check real 2025 sold prices and test a buying plan. Runs in your browser."
     />
     <meta name="theme-color" content="#0b1215" />
     <title>Winchester Buyer Check · Interactive demo</title>
@@ -19,20 +19,15 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <a class="skip-link" href="#workspace">Skip to workspace</a>
+    <a class="skip-link" href="#workspace">Skip to main content</a>
 
     <header class="app-header">
       <a class="brand" href="#homes" data-route="homes" aria-label="Winchester Buyer Check home">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="m4 11 8-7 8 7v9h-6v-6h-4v6H4z" /></svg>
         </span>
-        <span><small>Winchester</small><strong>Buyer Check</strong></span>
+        <strong>Winchester Buyer Check</strong>
       </a>
-
-      <div class="workspace-switcher" aria-label="Demo workspace">
-        <span>Viewing</span>
-        <strong>Seeded first-buyer shortlist</strong>
-      </div>
 
       <nav class="primary-nav" aria-label="Primary">
         <a href="#homes" data-route="homes"><span>Homes</span><b id="nav-home-count">9</b></a>
@@ -44,9 +39,8 @@
     </header>
 
     <div class="demo-strip" role="note">
-      <span>Interactive demo</span>
-      <p>Seeded examples and aggregated public data. Nothing is uploaded or saved to a server.</p>
-      <button id="reset-demo" type="button">Reset demo</button>
+      <p>Example data: nine made-up homes, plus real 2025 sold prices from HM Land Registry. Nothing you enter leaves this browser.</p>
+      <button id="reset-demo" type="button">Reset the example</button>
     </div>
 
     <main id="workspace" tabindex="-1"></main>
@@ -56,14 +50,14 @@
       <div>
         <a href="https://github.com/MatthewPaver">Matthew Paver</a>
         <span>·</span>
-        <a href="https://matthewpaver.github.io/">Software index</a>
+        <a href="https://matthewpaver.github.io/">All projects</a>
       </div>
     </footer>
 
     <div id="toast" role="status" aria-live="polite"></div>
 
     <noscript>
-      <p class="noscript">This interactive demo requires JavaScript. No data is transmitted when it runs.</p>
+      <p class="noscript">Winchester Buyer Check needs JavaScript to run. Nothing you enter is sent anywhere.</p>
     </noscript>
     <script src="calculator.js"></script>
     <script src="market-data.js"></script>

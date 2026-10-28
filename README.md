@@ -5,15 +5,15 @@ A browser-only decision aid for first-time buyers in Winchester: it puts price, 
 [![Deploy to GitHub Pages](https://github.com/MatthewPaver/winchester-buyer-check/actions/workflows/pages.yml/badge.svg)](https://github.com/MatthewPaver/winchester-buyer-check/actions/workflows/pages.yml)
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 
-![Winchester Buyer Check demo: seeded shortlist home screen](docs/assets/screenshot.png)
+![Winchester Buyer Check: the saved homes list, with price, walk to the station, fit score and what is still to confirm for each home](docs/assets/screenshot.png)
 
-**Live demo:** <https://matthewpaver.github.io/winchester-buyer-check/>. No sign-up or install. Try **Under £425k**, open a home, check its evidence list, then change the affordability inputs.
+**Live demo:** <https://matthewpaver.github.io/winchester-buyer-check/>. No sign-up or install. Try **Under £425k**, open a home, tick off its checklist, then change the numbers on the Plan page.
 
-The nine shortlisted homes are fictional fixtures. The market view is built from a real, traceable 2025 HM Land Registry snapshot. The decision checks are fixed rules; there is no AI or LLM in this project.
+The nine saved homes are made-up examples. The market view is built from a real, traceable 2025 HM Land Registry snapshot. The decision checks are fixed rules; there is no AI or LLM in this project.
 
 ## The problem
 
-A first-time buyer in Winchester with a Lifetime ISA has a hard ceiling: the LISA can only be used on a home costing £450,000 or less. Asking prices sit close to that line, listing photos do the persuading, and the evidence that should decide an offer (what similar homes actually sold for, how long the walk to the station really is, which facts are only the agent's claim) is scattered or missing.
+A first-time buyer in Winchester with a Lifetime ISA (LISA) has a hard ceiling: the LISA can only be used on a home costing £450,000 or less. Asking prices sit close to that line, listing photos do the persuading, and the evidence that should decide an offer (what similar homes actually sold for, how long the walk to the station really is, which facts are only the agent's claim) is scattered or missing.
 
 The demo keeps that evidence in one place:
 
@@ -50,7 +50,7 @@ flowchart LR
     S --> B["scripts/build-market-summary.mjs<br/>filters, groups, quantiles"]
     B --> M["market-data.js<br/>data/market-summary.json"]
     M --> A["Browser app<br/>index.html + app.js"]
-    F["Seeded homes<br/>9 fictional fixtures"] --> A
+    F["Example homes<br/>9 made-up homes in app.js"] --> A
     C["calculator.js<br/>affordability, LISA cap"] --> A
     A --> L[("localStorage<br/>selection, checklist")]
 ```
@@ -61,7 +61,7 @@ flowchart LR
 | `data/price-paid-source.json` | The committed, address-minimised snapshot the app is built from |
 | `scripts/build-market-summary.mjs` | Applies the inclusion filters and writes groups, counts and percentile bands to `market-data.js` and `data/market-summary.json` |
 | `calculator.js` | Pure affordability and purchase-cost functions, shared by the browser and the Node tests |
-| `app.js` | The single-page UI: shortlist, market view, plan, review, evidence checklist. State stays in the browser |
+| `app.js` | The single-page UI: saved homes list, market view, plan, review, evidence checklist. State stays in the browser |
 | `docs/MARKET_DATA_CONTRACT.md` | Exact filters, counts, quantile method and what the snapshot must not be used to claim |
 
 ## Results: what the data supports
@@ -95,7 +95,7 @@ HMLR revises the yearly file monthly, so a new download is a new snapshot and sh
 What this does not show:
 
 - **A valuation.** The bands are the observed 25th–75th percentiles of completed 2025 sales in a postcode and type group. They are not confidence intervals and say nothing about a specific home.
-- **Anything about the nine homes.** They are fictional and not linked to any HMLR transaction. Their fit scores (68–92) and verdicts are fixture values written into `app.js`, not computed from the market data.
+- **Anything about the nine homes.** They are fictional and not linked to any HMLR transaction. Their fit scores (68–92) and verdicts are set by hand in `app.js`, not computed from the market data. The app says so next to the list.
 
 ## Design decisions and trade-offs
 
@@ -103,16 +103,16 @@ What this does not show:
 - **A committed, address-minimised projection over fetching HMLR at runtime or committing the full CSV.** The app and its tests work offline, the 159 MiB file stays out of Git, and only transaction ID, price, date, outward postcode, type, category and record status are kept. Cost: the snapshot ages, and refreshing it is a manual, reviewed step.
 - **Generated market figures, checked in CI, over hand-entered numbers.** An earlier version showed a market claim with no traceable source; it was replaced by this pipeline. Every figure on the market screen is produced by one script from one checksummed file. Cost: an extra build step that must be re-run after any change to the source or filters.
 - **Fixed-threshold rules over a model or LLM score.** The review checks are explicit: the £450,000 LISA cap, a station walk of 15 or 22 minutes, evidence coverage of 75%. Anyone can read why a home is flagged, and the same inputs always give the same answer. Cost: the thresholds are judgement calls, not calibrated against outcomes.
-- **Fictional homes over real listings.** Scraping property portals raises rights questions, and showing a real address invites people to treat the demo's view of it as fact. Cost: the shortlist demonstrates the workflow, not a live search.
+- **Fictional homes over real listings.** Scraping property portals raises rights questions, and showing a real address invites people to treat the demo's view of it as fact. Cost: the saved homes list demonstrates the workflow, not a live search.
 
 ## Limits and non-goals
 
 - Not financial, mortgage, tax or legal advice. The calculator is illustrative; see [NOTICE.md](NOTICE.md).
 - No live listings, no listing search, no account, no mortgage decision and no offer submission.
 - Market context covers 2025 completed sales only, for one district and three outward postcodes.
-- Commute is a station walk time per fixture home, not a routed journey.
-- Fit scores, verdicts and offer ranges for the shortlist are illustrative fixture logic.
-- One 711-line `app.js` renders every screen. That suits a static demo; a larger product would split it.
+- Commute is a station walk time per example home, not a routed journey.
+- Fit scores and verdicts are set by hand; offer ranges come from simple illustrative rules.
+- One 755-line `app.js` renders every screen. That suits a static demo; a larger product would split it.
 
 ## Repository layout and tests
 

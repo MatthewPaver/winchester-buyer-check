@@ -20,7 +20,7 @@ with sync_playwright() as playwright:
     page.wait_for_load_state("networkidle")
 
     assert page.title() == "Winchester Buyer Check · Interactive demo"
-    page.get_by_role("heading", name="Compare your shortlisted homes").wait_for()
+    page.get_by_role("heading", name="Saved homes in Winchester").wait_for()
     assert page.locator(".home-card").count() == 9
 
     showcase = browser.new_page(viewport={"width": 1200, "height": 675})
@@ -31,20 +31,20 @@ with sync_playwright() as playwright:
 
     page.get_by_role("link", name="Market").click()
     page.get_by_role("heading", name="2025 sold prices by area and property type").wait_for()
-    assert "931 of 1,046" in page.locator(".feature-hero--market").inner_text()
-    assert "2025-01-02 to 2025-12-24" in page.locator(".feature-hero--market").inner_text()
+    assert "931 of 1,046" in page.locator(".page-head").inner_text()
+    assert "2 Jan 2025 to 24 Dec 2025" in page.locator(".page-head").inner_text()
     page.get_by_label("Postcode area").select_option("SO23")
     # Four generated property groups appear once in the chart and once in the table.
     assert page.locator("[data-market-row]:not([hidden])").count() == 8
 
     page.get_by_role("link", name="Plan").click()
     page.get_by_label("Asking price").fill("460000")
-    page.get_by_text("LISA blocked", exact=True).wait_for()
+    page.get_by_text("Over the Lifetime ISA limit", exact=True).wait_for()
 
     page.get_by_role("link", name="Homes 9").click()
     page.get_by_role("button", name="Review Upper Brook Street").click()
     page.get_by_role("heading", name="Upper Brook Street").wait_for()
-    page.get_by_text("Rule-based checks", exact=True).wait_for()
+    page.get_by_role("heading", name="Checks on finance, commute and evidence").wait_for()
 
     page.get_by_role("link", name="Evidence").click()
     page.get_by_text("40%", exact=True).wait_for()
