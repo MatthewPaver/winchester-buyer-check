@@ -32,7 +32,8 @@ jobs:
           node --test tests/*.test.cjs
           python -m unittest discover -s tests -p 'test_*.py'
           node scripts/build-market-summary.mjs
-          git diff --exit-code -- data/market-summary.json market-data.js
+          node scripts/build-buying-rules.mjs
+          git diff --exit-code -- data/market-summary.json market-data.js buying-rules.js
       - name: Install browser test runtime
         run: |
           python -m pip install playwright==1.58.0

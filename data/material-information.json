@@ -1,0 +1,52 @@
+{
+  "name": "Material information a buyer should get before an offer",
+  "lastVerified": "2026-10-28",
+  "sources": [
+    {
+      "title": "National Trading Standards Estate and Letting Agency Team: Material information, quick guide for property agents (v1.0, November 2023), summary table of Parts A, B and C",
+      "url": "https://www.tpi.org.uk/media/upzeug2t/material-information-qg-for-agents-v10.pdf"
+    },
+    {
+      "title": "MHCLG consultation: Material information in property listings (updated 19 June 2026), proposed list of categories",
+      "url": "https://www.gov.uk/government/consultations/material-information-in-property-listings/material-information-in-property-listings"
+    }
+  ],
+  "note": "The National Trading Standards guide was published for estate agents. The government consulted from October to December 2025 on new guidance under the Digital Markets, Competition and Consumers Act 2024; its proposed list covers the same items.",
+  "groups": [
+    {
+      "id": "A",
+      "title": "Always needed",
+      "description": "Part A: costs and terms that matter for every home.",
+      "items": [
+        { "id": "price", "label": "Asking price", "help": "The price on the listing.", "known": "price" },
+        { "id": "council-tax", "label": "Council tax band", "help": "Sets your yearly council tax bill. Ask the agent." },
+        { "id": "tenure", "label": "Tenure, and any lease length, ground rent or service charge", "help": "Freehold or leasehold, and any costs you cannot avoid. Your conveyancer checks the title.", "known": "tenure" }
+      ]
+    },
+    {
+      "id": "B",
+      "title": "Needed for every home",
+      "description": "Part B: facts the agent should find out for every home.",
+      "items": [
+        { "id": "type-construction", "label": "Property type and how it is built", "help": "For example terraced or detached; standard build, thatched roof or prefabricated." },
+        { "id": "rooms", "label": "Number and types of room", "help": "Bedrooms, bathrooms and living space, ideally with a floor plan.", "known": "rooms" },
+        { "id": "utilities", "label": "Electricity, water, sewerage and heating", "help": "How each is supplied, for example mains water or a septic tank, gas or electric heating." },
+        { "id": "broadband-mobile", "label": "Broadband and mobile signal", "help": "What speeds and coverage are available at the address." },
+        { "id": "parking", "label": "Parking", "help": "Whether there is a space, a garage, a permit zone or on-street parking only." }
+      ]
+    },
+    {
+      "id": "C",
+      "title": "Needed if it affects the home",
+      "description": "Part C: check whether each applies. Ask the agent and your conveyancer.",
+      "items": [
+        { "id": "building-safety", "label": "Building safety", "help": "For example cladding, fire safety or structural problems." },
+        { "id": "restrictions", "label": "Restrictions", "help": "For example a listed building, a conservation area or limits on how the home can be used." },
+        { "id": "rights-easements", "label": "Rights and easements", "help": "For example a neighbour’s right of way, shared drives or wayleaves for cables and pipes." },
+        { "id": "risks", "label": "Flood, coastal erosion and mining risk", "help": "Whether the home is at risk of flooding or erosion, or sits in a coalfield or mining area." },
+        { "id": "planning", "label": "Planning permission and nearby developments", "help": "Approved or proposed building work at the home or close by." },
+        { "id": "accessibility", "label": "Accessibility and adaptations", "help": "For example step-free access, a ramp or a stairlift." }
+      ]
+    }
+  ]
+}

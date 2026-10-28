@@ -1,9 +1,24 @@
 (function exposeBuyerCalculator(root, factory) {
-  const api = factory();
+  // Node reads the checked rules from data/; the browser gets the same JSON from buying-rules.js.
+  const rules =
+    typeof module === "object" && module.exports
+      ? { sdlt: require("./data/sdlt-rates.json"), lifetimeIsa: require("./data/lifetime-isa.json") }
+      : root.WINCHESTER_BUYING_RULES;
+  const api = factory(rules);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.BuyerCalculator = api;
-})(typeof window === "undefined" ? globalThis : window, function createBuyerCalculator() {
+})(typeof window === "undefined" ? globalThis : window, function createBuyerCalculator(rules) {
+  if (!rules?.sdlt?.standard?.bands || !rules?.lifetimeIsa?.priceLimit) {
+    throw new Error("Buying rules are missing: load buying-rules.js before calculator.js");
+  }
   const nonNegative = (value) => Math.max(0, Number(value) || 0);
+
+  const LISA_PRICE_LIMIT = rules.lifetimeIsa.priceLimit;
+  const LISA_MAX_CONTRIBUTION = rules.lifetimeIsa.maxContributionPerYear;
+  const LISA_BONUS_RATE = rules.lifetimeIsa.bonusRatePercent / 100;
+  const SDLT_RELIEF_LIMIT = rules.sdlt.firstTimeBuyerRelief.maxPrice;
+  // Below TIGHT_HEADROOM of spare budget counts as "only just".
+  const TIGHT_HEADROOM = 15000;
 
   function monthlyPayment(loan, annualRate, years) {
     const principal = nonNegative(loan);
@@ -15,6 +30,52 @@
       (principal * (monthlyRate * Math.pow(1 + monthlyRate, months))) /
       (Math.pow(1 + monthlyRate, months) - 1)
     );
+  }
+
+  // Tax on each slice of a whole-pound price. Rates are whole percentages, so the
+  // sum is exact in pence before the single division.
+  function taxOnBands(price, bands) {
+    let pencePercent = 0;
+    let lower = 0;
+    for (const band of bands) {
+      const upper = band.upTo === null ? Infinity : band.upTo;
+      if (price > lower) pencePercent += (Math.min(price, upper) - lower) * band.ratePercent;
+      lower = upper;
+    }
+    return pencePercent / 100;
+  }
+
+  // Stamp Duty Land Tax for one residential home in England, rates from 1 April 2025.
+  function stampDutyDetail(price, firstTimeBuyer = false) {
+    const wholePrice = Math.floor(nonNegative(price));
+    const relief = rules.sdlt.firstTimeBuyerRelief;
+    const reliefApplies = Boolean(firstTimeBuyer) && wholePrice <= relief.maxPrice;
+    const tax = taxOnBands(wholePrice, reliefApplies ? relief.bands : rules.sdlt.standard.bands);
+    return { tax, reliefApplies, reliefLost: Boolean(firstTimeBuyer) && !reliefApplies };
+  }
+
+  function stampDuty(price, firstTimeBuyer = false) {
+    return stampDutyDetail(price, firstTimeBuyer).tax;
+  }
+
+  // Cash costs paid on or before completion, other than the deposit.
+  // `fees` is the older single "buying fees" figure, still accepted as an extra cost.
+  function buyingCosts(values, price) {
+    const duty = stampDutyDetail(price, values.firstTimeBuyer);
+    const items = {
+      stampDuty: duty.tax,
+      conveyancing: nonNegative(values.conveyancing),
+      survey: nonNegative(values.survey),
+      lenderFee: nonNegative(values.lenderFee),
+      moving: nonNegative(values.moving),
+      otherFees: nonNegative(values.fees),
+    };
+    const total = Object.values(items).reduce((sum, value) => sum + value, 0);
+    return { ...items, total, reliefApplies: duty.reliefApplies, reliefLost: duty.reliefLost };
+  }
+
+  function lisaBonusFor(values) {
+    return values.useLisa ? Math.min(nonNegative(values.lisaContribution), LISA_MAX_CONTRIBUTION) * LISA_BONUS_RATE : 0;
   }
 
   function calculatePurchase(values) {
@@ -36,29 +97,45 @@
     return { price, deposit, loan, monthly, ltv, cash, monthlyTotal, totalInterest };
   }
 
+  // The plan applied to one price. Stamp duty depends on the price, so the most you
+  // can pay is the highest whole-pound price whose price plus buying costs fits.
   function calculateAffordability(values) {
     const salary = nonNegative(values.salary);
     const deposit = nonNegative(values.deposit);
-    const lisaBonus = values.useLisa ? Math.min(nonNegative(values.lisaContribution), 4000) * 0.25 : 0;
-    const fees = nonNegative(values.fees);
+    const lisaBonus = lisaBonusFor(values);
     const reserve = nonNegative(values.reserve);
     const works = nonNegative(values.works);
     const multiple = Math.max(1, nonNegative(values.multiple) || 4.5);
     const borrowingCapacity = salary * multiple;
-    const cashForPrice = Math.max(0, deposit + lisaBonus - fees - reserve - works);
-    const modelledMaxPrice = Math.min(
-      values.useLisa ? LISA_PRICE_LIMIT : Number.POSITIVE_INFINITY,
-      borrowingCapacity + cashForPrice,
-    );
+    const cashAvailable = deposit + lisaBonus;
+    const keepBack = reserve + works;
+
+    const spendable = borrowingCapacity + cashAvailable - keepBack;
+    const fits = (price) => price + buyingCosts(values, price).total <= spendable;
+    let low = 0;
+    let high = Math.max(0, Math.floor(spendable));
+    if (!fits(0)) high = 0;
+    while (low < high) {
+      const mid = Math.ceil((low + high) / 2);
+      if (fits(mid)) low = mid;
+      else high = mid - 1;
+    }
+    const modelledMaxPrice = Math.min(values.useLisa ? LISA_PRICE_LIMIT : Number.POSITIVE_INFINITY, low);
+
     const askingPrice = nonNegative(values.askingPrice);
-    const mortgageRequired = Math.max(0, askingPrice - deposit - lisaBonus);
+    const costs = buyingCosts(values, askingPrice);
+    const cashForPrice = Math.max(0, cashAvailable - costs.total - keepBack);
+    const mortgageRequired = Math.max(0, askingPrice - cashForPrice);
     const monthly = monthlyPayment(mortgageRequired, values.rate, values.term);
     const headroom = modelledMaxPrice - askingPrice;
     return {
       askingPrice,
       borrowingCapacity,
+      cashAvailable,
       cashForPrice,
+      costs,
       headroom,
+      keepBack,
       lisaBonus,
       modelledMaxPrice,
       monthly,
@@ -66,11 +143,30 @@
     };
   }
 
-  // One budget verdict for a price, shared by the Plan page and each home's review,
-  // so both always agree. Below TIGHT_HEADROOM of spare budget counts as "only just".
-  const LISA_PRICE_LIMIT = 450000;
-  const TIGHT_HEADROOM = 15000;
+  // What leaves your account on completion day for one price, and what is left.
+  function moneyOnTheDay(values, price) {
+    const result = calculateAffordability({ ...values, askingPrice: price });
+    const depositPaid = Math.min(result.askingPrice, result.cashForPrice);
+    const total = depositPaid + result.costs.total;
+    const mortgageShortfall = Math.max(0, result.mortgageRequired - result.borrowingCapacity);
+    return {
+      price: result.askingPrice,
+      depositPaid,
+      costs: result.costs,
+      total,
+      cashAvailable: result.cashAvailable,
+      lisaBonus: result.lisaBonus,
+      leftAfter: result.cashAvailable - total,
+      keepBack: result.keepBack,
+      cashShortfall: Math.max(0, total - result.cashAvailable),
+      mortgageRequired: result.mortgageRequired,
+      borrowingCapacity: result.borrowingCapacity,
+      mortgageShortfall,
+    };
+  }
 
+  // One budget verdict for a price, shared by the Plan page and each home's review,
+  // so both always agree.
   function assessBudget(plan, price) {
     const result = calculateAffordability({ ...plan, askingPrice: price });
     const lisaBlocked = Boolean(plan.useLisa) && result.askingPrice > LISA_PRICE_LIMIT;
@@ -83,7 +179,7 @@
           ? "tight"
           : "within";
     const tone = level === "tight" ? "attention" : level === "within" ? "success" : "danger";
-    return { ...result, atLisaLimit, level, lisaBlocked, tone };
+    return { ...result, atLisaLimit, level, lisaBlocked, tone, withinPlan: level === "tight" || level === "within" };
   }
 
   // Illustrative offer range for one home, never above what the buyer's plan allows.
@@ -102,11 +198,17 @@
 
   return {
     LISA_PRICE_LIMIT,
+    SDLT_RELIEF_LIMIT,
     TIGHT_HEADROOM,
+    rules,
     assessBudget,
-    offerRange,
+    buyingCosts,
     calculateAffordability,
     calculatePurchase,
+    moneyOnTheDay,
     monthlyPayment,
+    offerRange,
+    stampDuty,
+    stampDutyDetail,
   };
 });
