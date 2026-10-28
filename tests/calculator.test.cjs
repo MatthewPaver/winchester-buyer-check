@@ -56,5 +56,5 @@ test("static page exposes the full five-part demo workspace", () => {
     assert.match(html, new RegExp(`data-route="${route}"`));
   }
   assert.match(html, /calculator\.js"><\/script>\s*<script src="market-data\.js"><\/script>\s*<script src="app\.js/);
-  assert.match(html, /Nothing is uploaded or saved to a server/);
+  assert.match(html, /Nothing you enter leaves this browser/);
 });
