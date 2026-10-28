@@ -28,7 +28,7 @@ No dependencies to run it. Tests use Node 22 and Python 3.13 (the CI versions).
 ```bash
 git clone https://github.com/MatthewPaver/winchester-buyer-check.git && cd winchester-buyer-check
 python3 -m http.server 8765                       # then open http://127.0.0.1:8765/
-node --test tests/*.test.cjs                      # expect: # pass 9, # fail 0
+node --test tests/*.test.cjs                      # expect: # pass 12, # fail 0
 python3 -m unittest discover -s tests -p 'test_*.py'   # expect: OK
 ```
 
@@ -102,7 +102,7 @@ What this does not show:
 - **Static and browser-only over a backend.** An earlier private prototype (now archived) had accounts, persistent workspaces and background jobs. This edition has none: nothing to host or secure, and inputs never leave the browser (`localStorage`). Cost: no saved workspace across devices and no live listings.
 - **A committed, address-minimised projection over fetching HMLR at runtime or committing the full CSV.** The app and its tests work offline, the 159 MiB file stays out of Git, and only transaction ID, price, date, outward postcode, type, category and record status are kept. Cost: the snapshot ages, and refreshing it is a manual, reviewed step.
 - **Generated market figures, checked in CI, over hand-entered numbers.** An earlier version showed a market claim with no traceable source; it was replaced by this pipeline. Every figure on the market screen is produced by one script from one checksummed file. Cost: an extra build step that must be re-run after any change to the source or filters.
-- **Fixed-threshold rules over a model or LLM score.** The review checks are explicit: the £450,000 LISA cap, a station walk of 15 or 22 minutes, evidence coverage of 75%. Anyone can read why a home is flagged, and the same inputs always give the same answer. Cost: the thresholds are judgement calls, not calibrated against outcomes.
+- **Fixed-threshold rules over a model or LLM score.** The review checks are explicit: the most your plan allows (the same calculation as the Plan page), the £450,000 LISA cap, a station walk of 15 or 22 minutes, evidence coverage of 75%. Anyone can read why a home is flagged, and the same inputs always give the same answer. Cost: the thresholds are judgement calls, not calibrated against outcomes.
 - **Fictional homes over real listings.** Scraping property portals raises rights questions, and showing a real address invites people to treat the demo's view of it as fact. Cost: the saved homes list demonstrates the workflow, not a live search.
 
 ## Limits and non-goals
@@ -112,7 +112,7 @@ What this does not show:
 - Market context covers 2025 completed sales only, for one district and three outward postcodes.
 - Commute is a station walk time per example home, not a routed journey.
 - Fit scores and verdicts are set by hand; offer ranges come from simple illustrative rules.
-- One 755-line `app.js` renders every screen. That suits a static demo; a larger product would split it.
+- One 820-line `app.js` renders every screen. That suits a static demo; a larger product would split it.
 
 ## Repository layout and tests
 

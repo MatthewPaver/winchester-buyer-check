@@ -47,7 +47,7 @@
     const borrowingCapacity = salary * multiple;
     const cashForPrice = Math.max(0, deposit + lisaBonus - fees - reserve - works);
     const modelledMaxPrice = Math.min(
-      values.useLisa ? 450000 : Number.POSITIVE_INFINITY,
+      values.useLisa ? LISA_PRICE_LIMIT : Number.POSITIVE_INFINITY,
       borrowingCapacity + cashForPrice,
     );
     const askingPrice = nonNegative(values.askingPrice);
@@ -66,5 +66,32 @@
     };
   }
 
-  return { calculateAffordability, calculatePurchase, monthlyPayment };
+  // One budget verdict for a price, shared by the Plan page and each home's review,
+  // so both always agree. Below TIGHT_HEADROOM of spare budget counts as "only just".
+  const LISA_PRICE_LIMIT = 450000;
+  const TIGHT_HEADROOM = 15000;
+
+  function assessBudget(plan, price) {
+    const result = calculateAffordability({ ...plan, askingPrice: price });
+    const lisaBlocked = Boolean(plan.useLisa) && result.askingPrice > LISA_PRICE_LIMIT;
+    const atLisaLimit = Boolean(plan.useLisa) && result.askingPrice === LISA_PRICE_LIMIT;
+    const level = lisaBlocked
+      ? "over-lisa"
+      : result.headroom < 0
+        ? "over"
+        : result.headroom < TIGHT_HEADROOM
+          ? "tight"
+          : "within";
+    const tone = level === "tight" ? "attention" : level === "within" ? "success" : "danger";
+    return { ...result, atLisaLimit, level, lisaBlocked, tone };
+  }
+
+  return {
+    LISA_PRICE_LIMIT,
+    TIGHT_HEADROOM,
+    assessBudget,
+    calculateAffordability,
+    calculatePurchase,
+    monthlyPayment,
+  };
 });

@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 
-const { calculateAffordability, calculatePurchase } = require("../calculator.js");
+const { assessBudget, calculateAffordability, calculatePurchase } = require("../calculator.js");
 
 const standard = {
   price: 450000,
@@ -48,6 +48,62 @@ test("affordability keeps the LISA cap and reserves explicit", () => {
   assert.equal(result.modelledMaxPrice, 377500);
   assert.equal(result.headroom, -47500);
   assert.ok(result.monthly > 1600);
+});
+
+// The example plan from app.js: the most it allows is £377,500.
+const examplePlan = {
+  askingPrice: 425000,
+  salary: 72000,
+  deposit: 85000,
+  lisaContribution: 4000,
+  useLisa: true,
+  fees: 5500,
+  reserve: 12000,
+  works: 15000,
+  multiple: 4.5,
+  rate: 4.5,
+  term: 30,
+};
+
+test("review finance check judges each home against the plan, not only the Lifetime ISA limit", () => {
+  const over = assessBudget(examplePlan, 400000);
+  assert.equal(over.modelledMaxPrice, 377500);
+  assert.equal(over.level, "over");
+  assert.equal(over.tone, "danger");
+  assert.equal(over.headroom, -22500);
+  assert.equal(over.atLisaLimit, false);
+
+  const tight = assessBudget(examplePlan, 365000);
+  assert.equal(tight.level, "tight");
+  assert.equal(tight.tone, "attention");
+  assert.equal(tight.headroom, 12500);
+
+  const within = assessBudget({ ...examplePlan, salary: 90000 }, 365000);
+  assert.equal(within.level, "within");
+  assert.equal(within.tone, "success");
+  assert.equal(within.headroom, 85000);
+});
+
+test("review finance check flags the Lifetime ISA limit only at or over it", () => {
+  const atLimit = assessBudget({ ...examplePlan, salary: 120000 }, 450000);
+  assert.equal(atLimit.atLisaLimit, true);
+  assert.equal(atLimit.level, "tight");
+  assert.equal(atLimit.headroom, 0);
+
+  const overLimit = assessBudget(examplePlan, 460000);
+  assert.equal(overLimit.level, "over-lisa");
+  assert.equal(overLimit.tone, "danger");
+
+  const noLisa = assessBudget({ ...examplePlan, useLisa: false, salary: 120000 }, 460000);
+  assert.equal(noLisa.lisaBlocked, false);
+  assert.equal(noLisa.atLisaLimit, false);
+  assert.equal(noLisa.level, "within");
+});
+
+test("plan page and review agree for the same price", () => {
+  const plan = assessBudget(examplePlan, examplePlan.askingPrice);
+  assert.equal(plan.headroom, calculateAffordability(examplePlan).headroom);
+  assert.equal(plan.level, "over");
 });
 
 test("static page exposes the full five-part demo workspace", () => {

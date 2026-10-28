@@ -169,7 +169,7 @@ if (!marketData?.rows?.length) {
 }
 const marketRows = marketData.rows;
 
-const LISA_LIMIT = 450000;
+const LISA_LIMIT = window.BuyerCalculator.LISA_PRICE_LIMIT;
 
 const evidenceTasks = [
   { id: "listing", label: "Listing facts confirmed against the agent source", source: "Agent listing" },
@@ -202,6 +202,29 @@ function formatDate(value) {
 
 function plural(count, one, many) {
   return `${count} ${count === 1 ? one : many}`;
+}
+
+const formatWhole = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 });
+
+function parseMoney(value) {
+  return Number(String(value).replace(/[^\d.]/g, "")) || 0;
+}
+
+// The current plan applied to one home's price. Same rules as the Plan page.
+function budgetFor(home) {
+  return window.BuyerCalculator.assessBudget(state.plan, home.price);
+}
+
+function budgetLine(home) {
+  const check = budgetFor(home);
+  return `<p class="listing-budget"><strong>Your budget:</strong> <span class="tone-${check.tone}">${budgetHeadline(check)}.</span></p>`;
+}
+
+function budgetHeadline(check) {
+  if (check.level === "over-lisa") return "Over the Lifetime ISA limit";
+  if (check.level === "over") return `${formatMoney.format(Math.abs(check.headroom))} over what your plan allows`;
+  if (check.level === "tight") return "Only just within budget";
+  return `Within your budget, ${formatMoney.format(check.headroom)} to spare`;
 }
 
 const state = {
@@ -268,7 +291,8 @@ function setRoute(route) {
   if (location.hash !== `#${safeRoute}`) history.pushState(null, "", `#${safeRoute}`);
   render();
   workspace.focus({ preventScroll: true });
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
 }
 
 function updateNavigation() {
@@ -342,6 +366,7 @@ function homeCards() {
               <div class="home-facts">${homeFacts(home)}</div>
               <p class="listing-tenure">${tenureAndCondition(home)}</p>
               <p class="listing-why"><strong>${home.verdict}.</strong> ${home.note}</p>
+              ${budgetLine(home)}
               <p class="listing-gap"><strong>Still to confirm:</strong> ${stillToConfirm(home)}</p>
             </div>
             <div class="listing-side">
@@ -364,7 +389,13 @@ function homesSummary() {
     withinLisa === homes.length
       ? `all priced within the Lifetime ISA limit of ${formatMoney.format(LISA_LIMIT)}`
       : `${withinLisa} priced within the Lifetime ISA limit of ${formatMoney.format(LISA_LIMIT)}`;
-  return `${homes.length} homes, ${lisaPart}. ${nearStation} ${nearStation === 1 ? "is" : "are"} a 15-minute walk or less from the station. ${mostConfirmed} ${mostConfirmed === 1 ? "has" : "have"} most facts confirmed.`;
+  const affordable = homes.filter((home) => ["tight", "within"].includes(budgetFor(home).level)).length;
+  const maxPrice = window.BuyerCalculator.calculateAffordability(state.plan).modelledMaxPrice;
+  const coverPart = affordable === homes.length ? "all of them" : affordable === 0 ? "none of them" : `${affordable} of them`;
+  const planPart = Number.isFinite(maxPrice)
+    ? ` Your plan allows up to ${formatMoney.format(maxPrice)}, which covers ${coverPart}.`
+    : "";
+  return `${homes.length} homes, ${lisaPart}.${planPart} ${nearStation} ${nearStation === 1 ? "is" : "are"} a 15-minute walk or less from the station. ${mostConfirmed} ${mostConfirmed === 1 ? "has" : "have"} most facts confirmed.`;
 }
 
 function renderHomes() {
@@ -395,9 +426,10 @@ function renderHomes() {
         .map(([id, label]) => `<button type="button" data-home-filter="${id}" aria-pressed="${state.homeFilter === id}">${label}</button>`)
         .join("")}
     </div>
+    <h2 class="sr-only" id="home-list-heading">Saved homes</h2>
     <p class="result-count"><strong id="home-result-count">${filteredHomes().length}</strong> of ${homes.length} homes showing</p>
     <p class="list-key"><strong>Fit score</strong> rates each home out of 100 on budget, station walk, space, condition and evidence. In this example the scores are set by hand, not calculated. <strong>Facts confirmed</strong> is how much of the listing a source backs up, such as HM Land Registry, a survey or your own viewing. "Most" means 75% or more.</p>
-    <section class="listing-list" id="home-grid" aria-label="Saved homes">${homeCards()}</section>
+    <section class="listing-list" id="home-grid" aria-labelledby="home-list-heading">${homeCards()}</section>
   `;
 
   const grid = document.getElementById("home-grid");
@@ -509,20 +541,23 @@ function planField(id, label, options = {}) {
   const value = state.plan[id];
   const prefix = options.prefix ? `<span>${options.prefix}</span>` : "";
   const suffix = options.suffix ? `<span>${options.suffix}</span>` : "";
-  return `<label>${label}<span class="input-shell">${prefix}<input id="plan-${id}" name="${id}" type="number" min="${options.min ?? 0}" step="${options.step ?? 1}" value="${value}">${suffix}</span></label>`;
+  // Money fields are text inputs so they can show "425,000"; the plan keeps the number.
+  const input = options.money
+    ? `<input id="plan-${id}" name="${id}" type="text" inputmode="numeric" autocomplete="off" data-money value="${formatWhole.format(value)}">`
+    : `<input id="plan-${id}" name="${id}" type="number" min="${options.min ?? 0}" step="${options.step ?? 1}" value="${value}">`;
+  return `<label>${label}<span class="input-shell">${prefix}${input}${suffix}</span></label>`;
 }
 
 function planResults() {
-  const result = window.BuyerCalculator.calculateAffordability(state.plan);
-  const lisaBlocked = state.plan.useLisa && result.askingPrice > LISA_LIMIT;
-  const tone = lisaBlocked || result.headroom < 0 ? "shortfall" : result.headroom < 15000 ? "tight" : "ready";
-  const status = lisaBlocked
-    ? "Over the Lifetime ISA limit"
-    : result.headroom < 0
-      ? "Over budget"
-      : result.headroom < 15000
-        ? "Only just within budget"
-        : "Within budget";
+  const result = window.BuyerCalculator.assessBudget(state.plan, state.plan.askingPrice);
+  const lisaBlocked = result.lisaBlocked;
+  const tone = { "over-lisa": "shortfall", over: "shortfall", tight: "tight", within: "ready" }[result.level];
+  const status = {
+    "over-lisa": "Over the Lifetime ISA limit",
+    over: "Over budget",
+    tight: "Only just within budget",
+    within: "Within budget",
+  }[result.level];
   const decision = lisaBlocked
     ? `The asking price is ${formatMoney.format(result.askingPrice - LISA_LIMIT)} over the ${formatMoney.format(LISA_LIMIT)} Lifetime ISA limit.`
     : result.headroom < 0
@@ -562,21 +597,21 @@ function renderPlan() {
     <section class="plan-layout">
       <form id="plan-form" class="plan-form">
         <fieldset class="form-section"><legend>The home</legend><div class="field-grid">
-          ${planField("askingPrice", "Asking price", { prefix: "£", step: 1000 })}
+          ${planField("askingPrice", "Asking price", { prefix: "£", money: true })}
           <label class="check-field"><input id="plan-useLisa" name="useLisa" type="checkbox" ${state.plan.useLisa ? "checked" : ""}><span>Use a Lifetime ISA</span></label>
         </div></fieldset>
         <fieldset class="form-section"><legend>Borrowing</legend><div class="field-grid">
-          ${planField("salary", "Expected salary", { prefix: "£", step: 1000 })}
-          ${planField("multiple", "Loan as a multiple of salary", { suffix: "×", step: 0.1 })}
+          ${planField("salary", "Expected salary", { prefix: "£", money: true })}
+          ${planField("multiple", "Loan as a multiple of salary", { suffix: "times salary", step: 0.1 })}
           ${planField("rate", "Mortgage rate", { suffix: "%", step: 0.05 })}
           ${planField("term", "Mortgage term", { suffix: "years" })}
         </div></fieldset>
         <fieldset class="form-section"><legend>Your cash</legend><div class="field-grid">
-          ${planField("deposit", "Cash deposit", { prefix: "£", step: 1000 })}
-          ${planField("lisaContribution", "Lifetime ISA savings this year", { prefix: "£", step: 500 })}
-          ${planField("fees", "Buying fees", { prefix: "£", step: 100 })}
-          ${planField("reserve", "Cash to keep after buying", { prefix: "£", step: 1000 })}
-          ${planField("works", "First-year repairs and works", { prefix: "£", step: 1000 })}
+          ${planField("deposit", "Cash deposit", { prefix: "£", money: true })}
+          ${planField("lisaContribution", "Lifetime ISA savings this year", { prefix: "£", money: true })}
+          ${planField("fees", "Buying fees", { prefix: "£", money: true })}
+          ${planField("reserve", "Cash to keep after buying", { prefix: "£", money: true })}
+          ${planField("works", "First-year repairs and works", { prefix: "£", money: true })}
         </div></fieldset>
       </form>
       <div class="plan-output" id="plan-output" aria-live="polite">${planResults()}</div>
@@ -584,9 +619,15 @@ function renderPlan() {
   `;
   document.querySelectorAll("#plan-form input").forEach((input) => {
     input.addEventListener("input", () => {
-      state.plan[input.name] = input.type === "checkbox" ? input.checked : Number(input.value);
+      state.plan[input.name] =
+        input.type === "checkbox" ? input.checked : "money" in input.dataset ? parseMoney(input.value) : Number(input.value);
       document.getElementById("plan-output").innerHTML = planResults();
     });
+    if ("money" in input.dataset) {
+      input.addEventListener("blur", () => {
+        input.value = formatWhole.format(state.plan[input.name]);
+      });
+    }
   });
 }
 
@@ -596,10 +637,33 @@ function reviewSummary(home) {
   return { offerTarget, opening, walkAway: Math.min(LISA_LIMIT, home.price + (home.price < 430000 ? 5000 : 0)) };
 }
 
+// Finance check for one home: the plan's verdict first, the Lifetime ISA limit only when it matters.
+function financeCheck(home) {
+  const check = budgetFor(home);
+  const limit = formatMoney.format(LISA_LIMIT);
+  const maxPrice = formatMoney.format(check.modelledMaxPrice);
+  const planLink = '<a href="#plan" data-route="plan">Plan page</a>';
+  const limitNote = check.atLisaLimit
+    ? ` Do not let an offer, or a deal on fixtures and fittings, push the price above ${limit}.`
+    : "";
+  let text;
+  if (check.level === "over-lisa") {
+    text = `The asking price is ${formatMoney.format(home.price - LISA_LIMIT)} over the ${limit} Lifetime ISA limit.`;
+  } else if (check.level === "over") {
+    text = `Your plan allows up to ${maxPrice}. Check the numbers on the ${planLink} before you go further.${check.atLisaLimit ? ` The price is also at the ${limit} Lifetime ISA limit.` : ""}`;
+  } else if (check.level === "tight") {
+    text = `${formatMoney.format(check.headroom)} to spare after fees, the cash you keep back and first-year works. Don't spend it on a higher offer.${limitNote}`;
+  } else {
+    text = `Your plan allows up to ${maxPrice} after fees, the cash you keep back and first-year works. Don't spend the spare on a higher offer.${limitNote}`;
+  }
+  return { ...check, headline: budgetHeadline(check), text };
+}
+
 function renderReview() {
   const home = selectedHome();
   const offer = reviewSummary(home);
-  const atLimit = home.price === LISA_LIMIT;
+  const finance = financeCheck(home);
+  const overBudget = finance.tone === "danger";
   const commute = home.station <= 15 ? ["Short walk", "success"] : home.station <= 22 ? ["Test the route", "attention"] : ["Long walk", "attention"];
   const evidenceOk = home.evidence >= 75;
   workspace.innerHTML = `
@@ -619,6 +683,7 @@ function renderReview() {
       <div class="review-fit">
         <p class="review-score"><strong>${home.score}</strong> out of 100 fit score: <b>${home.verdict}</b></p>
         <p>${home.note}</p>
+        ${overBudget ? `<p class="fit-budget"><strong class="tone-danger">Over your budget.</strong> The fit score is set by hand and does not use your plan. See the finance check below.</p>` : ""}
         <label>Review another home<select id="review-home" name="review-home">${homes.map((item) => `<option value="${item.id}" ${item.id === home.id ? "selected" : ""}>${item.name}</option>`).join("")}</select></label>
       </div>
     </section>
@@ -637,7 +702,7 @@ function renderReview() {
         <h2>Checks on finance, commute and evidence</h2>
         <p class="section-lede">Fixed rules, applied the same way to every home.</p>
         <div class="rule-checks">
-          <article><span>Finance</span><strong class="tone-${atLimit ? "attention" : "success"}">${atLimit ? "At the Lifetime ISA limit" : `${formatMoney.format(LISA_LIMIT - home.price)} below the Lifetime ISA limit`}</strong><p>${atLimit ? `Do not let an offer, or a deal on fixtures and fittings, push the price above ${formatMoney.format(LISA_LIMIT)}.` : "Keep the remaining cash for fees, reserve and repairs. Don't spend it on a higher offer."}</p></article>
+          <article><span>Finance</span><strong class="tone-${finance.tone}">${finance.headline}</strong><p>${finance.text}</p></article>
           <article><span>Commute</span><strong class="tone-${commute[1]}">${commute[0]}</strong><p>This scores the walk to Winchester station only. The train to Waterloo and the rest of the trip are not part of the check.</p></article>
           <article><span>Evidence</span><strong class="tone-${evidenceOk ? "success" : "attention"}">${evidenceOk ? "Enough to book a viewing" : "Gaps remain"}</strong><p>${evidenceOk ? "The sources cover enough to decide on a viewing. Confirm the rest before you make an offer." : "Fill the title, condition or listing gaps before you rely on the fit score."}</p></article>
         </div>
@@ -661,7 +726,7 @@ function renderReview() {
     renderReview();
   });
   document.getElementById("copy-review").addEventListener("click", async () => {
-    const text = `${home.name}, ${home.postcode}\n${formatMoney.format(home.price)}. Fit score ${home.score} out of 100: ${home.verdict}.\nWalk to station: ${home.station} min. Facts confirmed: ${home.evidence}%.\nPrice to aim for: ${formatMoney.format(offer.offerTarget)}.\n\nExample from Winchester Buyer Check. Check all facts before acting.`;
+    const text = `${home.name}, ${home.postcode}\n${formatMoney.format(home.price)}. Fit score ${home.score} out of 100: ${home.verdict}.\nYour budget: ${finance.headline}.\nWalk to station: ${home.station} min. Facts confirmed: ${home.evidence}%.\nPrice to aim for: ${formatMoney.format(offer.offerTarget)}.\n\nExample from Winchester Buyer Check. Check all facts before acting.`;
     try {
       await navigator.clipboard.writeText(text);
       showToast("Review summary copied");
