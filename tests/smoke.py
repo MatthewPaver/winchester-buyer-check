@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import os
 
 from playwright.sync_api import sync_playwright
@@ -7,6 +8,8 @@ from playwright.sync_api import sync_playwright
 OUTPUT = Path("/tmp/winchester-buyer-check.png")
 SHOWCASE = Path(os.environ.get("WINCHESTER_SHOWCASE_PATH", "/tmp/winchester-showcase.png"))
 BASE_URL = os.environ.get("WINCHESTER_BASE_URL", "http://127.0.0.1:8765")
+# Market figures change with each monthly Land Registry refresh, so read them from the data.
+MARKET = json.loads((Path(__file__).parents[1] / "data/market-summary.json").read_text())
 
 
 with sync_playwright() as playwright:
@@ -43,14 +46,17 @@ with sync_playwright() as playwright:
     showcase.close()
 
     page.get_by_role("link", name="Market", exact=True).click()
-    page.get_by_role("heading", name="2025 sold prices by area and property type").wait_for()
-    assert "931 of 1,046" in page.locator(".page-head").inner_text()
-    assert "2 Jan 2025 to 24 Dec 2025" in page.locator(".page-head").inner_text()
-    assert page.locator(".range-bar").count() == 12
-    assert page.locator(".plan-line").count() == 12
+    coverage, rows = MARKET["coverage"], MARKET["rows"]
+    page.get_by_role("heading", name=f"{MARKET['source']['years'][0]} sold prices by area and property type").wait_for()
+    assert f"{coverage['includedRecords']:,} of {coverage['sourceRecords']:,}" in page.locator(".page-head").inner_text()
+    first, last = page.evaluate("([a, b]) => [formatDate(a), formatDate(b)]", [coverage["earliestSale"], coverage["latestSale"]])
+    assert f"{first} to {last}" in page.locator(".page-head").inner_text()
+    assert f"Sales registered to {last}." in page.locator(".market-note").inner_text()
+    assert page.locator(".range-bar").count() == len(rows)
+    assert page.locator(".plan-line").count() == len(rows)
     page.get_by_label("Postcode area").select_option("SO23")
-    # Four generated property groups appear once in the chart and once in the table.
-    assert page.locator("[data-market-row]:not([hidden])").count() == 8
+    # Each SO23 property group appears once in the chart and once in the table.
+    assert page.locator("[data-market-row]:not([hidden])").count() == 2 * sum(row["area"] == "SO23" for row in rows)
 
     page.get_by_role("link", name="Plan", exact=True).click()
     page.get_by_role("heading", name="Money needed on the day").wait_for()

@@ -9,7 +9,7 @@ A browser-only decision aid for first-time buyers in Winchester: it puts price, 
 
 **Live demo:** <https://matthewpaver.github.io/winchester-buyer-check/>. No sign-up or install. Try **Within my plan**, open a home, see the money you need on the day, tick off its checklist, then change the numbers and weights on the Plan page.
 
-The nine saved homes are made-up examples. The market view is built from a real, traceable 2025 HM Land Registry snapshot. Stamp duty and Lifetime ISA rules come from GOV.UK and are dated. The fit score and decision checks are fixed, readable rules; there is no AI or LLM in this project, and nothing you enter leaves the browser.
+The nine saved homes are made-up examples. The market view is built from a real, traceable HM Land Registry snapshot, refreshed monthly. Stamp duty and Lifetime ISA rules come from GOV.UK and are dated. The fit score and decision checks are fixed, readable rules; there is no AI or LLM in this project, and nothing you enter leaves the browser.
 
 ## The problem
 
@@ -20,7 +20,7 @@ The demo keeps that evidence in one place:
 1. **Can I afford it, and what do I need on the day?** A plan for deposit, loan and monthly payment that works out the most you can pay after stamp duty, conveyancing, survey, lender fee, moving, the cash you keep back and first-year works. Each home shows the money needed on completion day line by line.
 2. **Does the Lifetime ISA still apply?** The £450,000 cap, the 12-month rule, the 25% bonus and the 25% withdrawal charge, stated once where they matter.
 3. **How do the homes compare?** A fit score out of 100 from five parts (budget, walk to the station, bedrooms, condition, facts confirmed), each marked against a fixed yardstick. You choose how much each part counts, and the list says whether its ranking holds if one weight moves by a fifth. Homes within your plan sort first.
-4. **What did comparable homes sell for?** The middle half of 2025 sale prices and the median by outward postcode and property type, from HMLR Price Paid Data, with your plan maximum drawn across the chart.
+4. **What did comparable homes sell for?** The middle half of sale prices and the median by outward postcode and property type, from the latest HMLR Price Paid yearly file, with your plan maximum drawn across the chart.
 5. **What still needs checking?** A per-home checklist built on the National Trading Standards material information list (Parts A to C) plus three checks of your own, a source register, rule-based checks on finance, commute and evidence, and an offer range that never goes above your plan.
 
 ## Quickstart
@@ -47,8 +47,8 @@ Screenshots go to `/tmp` unless `WINCHESTER_SHOWCASE_PATH` is set; `WINCHESTER_B
 
 ```mermaid
 flowchart LR
-    H[("HMLR pp-2025.csv<br/>954,145 rows, not committed")] --> R["scripts/retain-price-paid.py<br/>Winchester, SO21–SO23,<br/>address fields dropped"]
-    R --> S[("data/price-paid-source.json<br/>1,046 rows + download SHA-256")]
+    H[("HMLR pp-YYYY.csv<br/>yearly file, not committed")] --> R["scripts/retain-price-paid.py<br/>Winchester, SO21–SO23,<br/>address fields dropped"]
+    R --> S[("data/price-paid-source.json<br/>Winchester rows + download SHA-256")]
     S --> B["scripts/build-market-summary.mjs<br/>filters, groups, quantiles"]
     B --> M["market-data.js<br/>data/market-summary.json"]
     M --> A["Browser app<br/>index.html + app.js"]
@@ -77,14 +77,14 @@ flowchart LR
 
 ## Results: what the data supports
 
-The market view reconciles from the official download to the numbers on screen. Every count below is recorded in `data/market-summary.json` and re-derived by the tests.
+The market view reconciles from the official download to the numbers on screen. The counts below are from the 18 November 2026 snapshot; each refresh records new ones in `data/market-summary.json`, and the tests re-derive them.
 
 | Stage | Rows |
 | --- | --- |
-| HMLR 2025 yearly file, retrieved 5 September 2026 | 954,145 |
-| Retained: district `WINCHESTER`, outward postcode SO21, SO22 or SO23 | 1,046 |
-| Included: category A, record status A, four residential types, £50,000–£3,000,000 | 931 |
-| Grouped: outward postcode × property type | 12 groups, 931 sales |
+| HMLR 2026 yearly file (published 28 October 2026), retrieved 18 November 2026 | 457,963 |
+| Retained: district `WINCHESTER`, outward postcode SO21, SO22 or SO23 | 561 |
+| Included: category A, record status A, four residential types, £50,000–£3,000,000 | 512 |
+| Grouped: outward postcode × property type | 12 groups, 512 sales |
 
 Reproduce from the committed snapshot, with no network access:
 
@@ -94,24 +94,24 @@ node scripts/build-market-summary.mjs && node scripts/build-buying-rules.mjs && 
 
 CI runs exactly this and fails if the regenerated files differ by a byte. The Node tests also check the source SHA-256, recount every group independently, and confirm that no full postcode or street address is retained.
 
-To refresh from HMLR (about 159 MiB; never needed to run the demo):
+A scheduled workflow (`.github/workflows/refresh-price-paid.yml`) refreshes the data on the 3rd of each month, runs the tests and commits only when the Winchester sales change. To refresh by hand (up to about 160 MiB; never needed to run the demo):
 
 ```bash
-curl --fail --location https://price-paid-data.publicdata.landregistry.gov.uk/pp-2025.csv -o /tmp/pp-2025.csv
-python3 scripts/retain-price-paid.py /tmp/pp-2025.csv && node scripts/build-market-summary.mjs
+curl --fail --location https://price-paid-data.publicdata.landregistry.gov.uk/pp-2026.csv -o /tmp/pp-2026.csv
+python3 scripts/retain-price-paid.py --year 2026 /tmp/pp-2026.csv && node scripts/build-market-summary.mjs
 ```
 
-HMLR revises the yearly file monthly, so a new download is a new snapshot and should be reviewed as one.
+HMLR revises the yearly file monthly, so each download is a new snapshot. The Market page shows the latest Winchester sale date in the file as "Sales registered to".
 
 What this does not show:
 
-- **A valuation.** The bands are the observed 25th–75th percentiles of completed 2025 sales in a postcode and type group. They are not confidence intervals and say nothing about a specific home.
+- **A valuation.** The bands are the observed 25th–75th percentiles of completed sales in a postcode and type group. They are not confidence intervals and say nothing about a specific home.
 - **Anything about the nine homes.** They are fictional and not linked to any HMLR transaction. Their facts (price, walk, bedrooms, condition, share of facts confirmed) and one-line verdicts are written by hand in `app.js`. The fit score is computed from those facts and your plan; it does not use the market data.
 
 ## Design decisions and trade-offs
 
 - **Static and browser-only over a backend.** An earlier private prototype (now archived) had accounts, persistent workspaces and background jobs. This edition has none: nothing to host or secure, and inputs never leave the browser (`localStorage`). Cost: no saved workspace across devices and no live listings.
-- **A committed, address-minimised projection over fetching HMLR at runtime or committing the full CSV.** The app and its tests work offline, the 159 MiB file stays out of Git, and only transaction ID, price, date, outward postcode, type, category and record status are kept. Cost: the snapshot ages, and refreshing it is a manual, reviewed step.
+- **A committed, address-minimised projection over fetching HMLR at runtime or committing the full CSV.** The app and its tests work offline, the yearly file (up to about 160 MiB) stays out of Git, and only transaction ID, price, date, outward postcode, type, category and record status are kept. Cost: the snapshot lags HMLR's monthly release by up to a month.
 - **Generated market figures, checked in CI, over hand-entered numbers.** An earlier version showed a market claim with no traceable source; it was replaced by this pipeline. Every figure on the market screen is produced by one script from one checksummed file. Cost: an extra build step that must be re-run after any change to the source or filters.
 - **Fixed-threshold rules over a model or LLM score.** The review checks are explicit: the most your plan allows (the same calculation as the Plan page), the £450,000 LISA cap, a station walk of 15 or 22 minutes, evidence coverage of 75%. Anyone can read why a home is flagged, and the same inputs always give the same answer. Cost: the thresholds are judgement calls, not calibrated against outcomes.
 - **Fixed anchors over ranking against the shortlist.** Each part of the fit score is marked against a fixed yardstick (for example full marks for a walk of 15 minutes or less, half at 22), not scaled between the best and worst home on the list. Adding or removing a home never changes another home's score. A one-at-a-time check moves each weight by a fifth and reports whether the top three change. Cost: the anchors are stated assumptions; the app lets you change the weights, not the anchors.
@@ -123,7 +123,7 @@ What this does not show:
 
 - Not financial, mortgage, tax or legal advice. The calculator is illustrative; see [NOTICE.md](NOTICE.md).
 - No live listings, no listing search, no account, no mortgage decision and no offer submission.
-- Market context covers 2025 completed sales only, for one district and three outward postcodes.
+- Market context covers one year's completed sales only (the year shown on the Market page), for one district and three outward postcodes.
 - Commute is a station walk time per example home, not a routed journey.
 - Stamp duty covers residential homes in England and Northern Ireland for a buyer who will own one home. It does not model the higher rates for additional homes, the non-resident surcharge or shared ownership.
 - Buying costs other than stamp duty are example figures for you to replace with quotes. Offer ranges come from simple illustrative rules.

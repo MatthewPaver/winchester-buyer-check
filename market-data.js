@@ -1,19 +1,19 @@
 window.WINCHESTER_MARKET_DATA = {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-05T10:12:42.133192+00:00",
+  "generatedAt": "2026-11-18T17:01:07.847717+00:00",
   "source": {
     "name": "HM Land Registry Price Paid Data",
-    "downloadUrl": "https://price-paid-data.publicdata.landregistry.gov.uk/pp-2025.csv",
+    "downloadUrl": "https://price-paid-data.publicdata.landregistry.gov.uk/pp-2026.csv",
     "landingPage": "https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads",
     "licence": "Open Government Licence v3.0",
     "attribution": "Contains HM Land Registry data © Crown copyright and database right 2021. This data is licensed under the Open Government Licence v3.0.",
-    "fetchedAt": "2026-09-05T10:12:42.133192+00:00",
+    "fetchedAt": "2026-11-18T17:01:07.847717+00:00",
     "years": [
-      2025
+      2026
     ],
-    "downloadSha256": "00031f353d91cec625ad2212dd2f436eb77fc31e0776d5bf17fe4587fc4e0c24",
+    "downloadSha256": "568aa30f85cffad4582193d84d68d9491b97913c80c905e0d7b681ce32d04d71",
     "projection": "WINCHESTER district and SO21/SO22/SO23 outward postcodes; retain transaction ID, price, sale date, outward postcode, type, category and record status only.",
-    "inputSha256": "7c3e2ccbbf4fbed4bd702a8f7f36839b16c01f95517db0c91d79992ce9a08b96"
+    "inputSha256": "d9a830adc9cad012eb2bab605e39a6ca84760a8821e7fd762d78757b4bed3311"
   },
   "coverage": {
     "district": "WINCHESTER",
@@ -22,15 +22,15 @@ window.WINCHESTER_MARKET_DATA = {
       "SO22",
       "SO23"
     ],
-    "downloadRecords": 954145,
-    "excludedByGeography": 953099,
-    "records": 1046,
-    "earliestSale": "2025-01-02",
-    "latestSale": "2025-12-24",
-    "sourceRecords": 1046,
-    "includedRecords": 931,
-    "excludedRecords": 115,
-    "groupedRecords": 931
+    "downloadRecords": 457963,
+    "excludedByGeography": 457402,
+    "records": 561,
+    "earliestSale": "2026-01-02",
+    "latestSale": "2026-09-25",
+    "sourceRecords": 561,
+    "includedRecords": 512,
+    "excludedRecords": 49,
+    "groupedRecords": 512
   },
   "filters": {
     "postcodePrefixes": [
@@ -56,7 +56,7 @@ window.WINCHESTER_MARKET_DATA = {
     "quantileMethod": "linear interpolation on sorted observed prices"
   },
   "caveats": [
-    "Historical 2025 completed sales, not current listings or a valuation.",
+    "Historical 2026 completed sales, not current listings or a valuation.",
     "Registration delays and subsequent corrections can change the source yearly file.",
     "These records are unrelated to the nine fictional shortlisted homes.",
     "Outward postcode areas are retained for residential price comparison; full addresses are omitted."
@@ -65,98 +65,98 @@ window.WINCHESTER_MARKET_DATA = {
     {
       "area": "SO21",
       "type": "Detached",
-      "sales": 96,
-      "p25": 592500,
-      "median": 797475,
-      "p75": 1310000
-    },
-    {
-      "area": "SO21",
-      "type": "Flat",
-      "sales": 15,
-      "p25": 166000,
-      "median": 210000,
-      "p75": 245000
-    },
-    {
-      "area": "SO21",
-      "type": "Semi-detached",
-      "sales": 55,
-      "p25": 420000,
-      "median": 530000,
-      "p75": 655000
-    },
-    {
-      "area": "SO21",
-      "type": "Terraced",
-      "sales": 36,
-      "p25": 351250,
-      "median": 420750,
-      "p75": 548125
-    },
-    {
-      "area": "SO22",
-      "type": "Detached",
-      "sales": 124,
-      "p25": 615000,
-      "median": 849000,
-      "p75": 1100000
-    },
-    {
-      "area": "SO22",
-      "type": "Flat",
       "sales": 59,
-      "p25": 220000,
-      "median": 300000,
-      "p75": 492500
+      "p25": 552500,
+      "median": 660000,
+      "p75": 945000
+    },
+    {
+      "area": "SO21",
+      "type": "Flat",
+      "sales": 6,
+      "p25": 193125,
+      "median": 229250,
+      "p75": 238750
+    },
+    {
+      "area": "SO21",
+      "type": "Semi-detached",
+      "sales": 32,
+      "p25": 372500,
+      "median": 457500,
+      "p75": 607500
+    },
+    {
+      "area": "SO21",
+      "type": "Terraced",
+      "sales": 28,
+      "p25": 315000,
+      "median": 381250,
+      "p75": 470750
+    },
+    {
+      "area": "SO22",
+      "type": "Detached",
+      "sales": 66,
+      "p25": 647500,
+      "median": 791500,
+      "p75": 1050000
+    },
+    {
+      "area": "SO22",
+      "type": "Flat",
+      "sales": 30,
+      "p25": 200625,
+      "median": 314000,
+      "p75": 413125
     },
     {
       "area": "SO22",
       "type": "Semi-detached",
-      "sales": 110,
-      "p25": 394438,
-      "median": 481000,
-      "p75": 608750
+      "sales": 46,
+      "p25": 408403,
+      "median": 514000,
+      "p75": 741250
     },
     {
       "area": "SO22",
       "type": "Terraced",
-      "sales": 111,
-      "p25": 345000,
-      "median": 440000,
-      "p75": 691000
+      "sales": 59,
+      "p25": 330400,
+      "median": 467500,
+      "p75": 632500
     },
     {
       "area": "SO23",
       "type": "Detached",
-      "sales": 57,
-      "p25": 600000,
-      "median": 740000,
-      "p75": 940000
+      "sales": 29,
+      "p25": 720000,
+      "median": 895000,
+      "p75": 1210000
     },
     {
       "area": "SO23",
       "type": "Flat",
-      "sales": 87,
-      "p25": 209250,
-      "median": 275000,
-      "p75": 357500
+      "sales": 51,
+      "p25": 215000,
+      "median": 269000,
+      "p75": 325000
     },
     {
       "area": "SO23",
       "type": "Semi-detached",
-      "sales": 64,
-      "p25": 435000,
-      "median": 541000,
-      "p75": 835000
+      "sales": 37,
+      "p25": 430000,
+      "median": 505000,
+      "p75": 815000
     },
     {
       "area": "SO23",
       "type": "Terraced",
-      "sales": 117,
-      "p25": 400000,
-      "median": 530000,
-      "p75": 682000
+      "sales": 69,
+      "p25": 375000,
+      "median": 490000,
+      "p75": 650000
     }
   ]
 };

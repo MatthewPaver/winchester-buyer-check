@@ -1,0 +1,48 @@
+name: Refresh sold prices
+
+# HM Land Registry updates its yearly Price Paid files on the 20th working day of each month.
+on:
+  schedule:
+    - cron: "17 6 3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit the refreshed data
+  actions: write # start the Pages deploy: pushes made with GITHUB_TOKEN do not trigger workflows
+
+concurrency:
+  group: refresh-price-paid
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+      - name: Download, retain, rebuild and test
+        run: |
+          # ponytail: one yearly file. A new year's file has few sales until spring, so use the year of three months ago.
+          year=$(date -u -d "$(date -u +%Y-%m-01) -3 months" +%Y)
+          curl --fail --location --silent --show-error -o "$RUNNER_TEMP/pp.csv" "https://price-paid-data.publicdata.landregistry.gov.uk/pp-$year.csv"
+          python3 scripts/retain-price-paid.py --year "$year" "$RUNNER_TEMP/pp.csv"
+          node scripts/build-market-summary.mjs
+          node --test tests/*.test.cjs
+          python3 -m unittest discover -s tests -p 'test_*.py'
+      - name: Commit only if the Winchester sales changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git show HEAD:data/price-paid-source.json | jq -e --slurpfile new data/price-paid-source.json '.records == $new[0].records' >/dev/null; then
+            echo "No change in Winchester sales; nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git add data/price-paid-source.json data/market-summary.json market-data.js
+          git commit -m "data: refresh Winchester sold prices to $(jq -r .coverage.latestSale data/price-paid-source.json)"
+          git push
+          gh workflow run pages.yml --ref main

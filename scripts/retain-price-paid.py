@@ -8,12 +8,12 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-URL = "https://price-paid-data.publicdata.landregistry.gov.uk/pp-2025.csv"
+URL = "https://price-paid-data.publicdata.landregistry.gov.uk/pp-{year}.csv"
 PREFIXES = ["SO21", "SO22", "SO23"]
 TYPES = {"D": "detached", "S": "semi-detached", "T": "terraced", "F": "flat-maisonette", "O": "other"}
 
 
-def retain(path):
+def retain(path, year=2025):
     digest = hashlib.sha256()
     with path.open("rb") as source:
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
@@ -30,9 +30,9 @@ def retain(path):
             try:
                 sale_date = date.fromisoformat(row[2][:10])
             except ValueError as error:
-                raise ValueError(f"Expected a valid 2025 sale date at row {total}") from error
-            if sale_date.year != 2025:
-                raise ValueError(f"Expected a 2025 sale date at row {total}; got {sale_date}")
+                raise ValueError(f"Expected a valid {year} sale date at row {total}") from error
+            if sale_date.year != year:
+                raise ValueError(f"Expected a {year} sale date at row {total}; got {sale_date}")
             records.append({"id": row[0], "price": int(row[1]), "date": sale_date.isoformat(),
                             "postcode": area, "propertyType": TYPES[row[4]],
                             "category": row[14], "recordStatus": row[15]})
@@ -42,18 +42,18 @@ def retain(path):
     dates = [row["date"] for row in records]
     return {
         "source": {
-            "name": "HM Land Registry Price Paid Data", "downloadUrl": URL,
+            "name": "HM Land Registry Price Paid Data", "downloadUrl": URL.format(year=year),
             "landingPage": "https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads",
             "licence": "Open Government Licence v3.0",
             "attribution": "Contains HM Land Registry data © Crown copyright and database right 2021. This data is licensed under the Open Government Licence v3.0.",
-            "fetchedAt": datetime.now(timezone.utc).isoformat(), "years": [2025],
+            "fetchedAt": datetime.now(timezone.utc).isoformat(), "years": [year],
             "downloadSha256": digest.hexdigest(),
             "projection": "WINCHESTER district and SO21/SO22/SO23 outward postcodes; retain transaction ID, price, sale date, outward postcode, type, category and record status only.",
         },
         "coverage": {"district": "WINCHESTER", "postcodePrefixes": PREFIXES,
                      "downloadRecords": total, "excludedByGeography": total - len(records),
                      "records": len(records), "earliestSale": min(dates), "latestSale": max(dates)},
-        "caveats": ["Historical 2025 completed sales, not current listings or a valuation.",
+        "caveats": [f"Historical {year} completed sales, not current listings or a valuation.",
                     "Registration delays and subsequent corrections can change the source yearly file.",
                     "These records are unrelated to the nine fictional shortlisted homes.",
                     "Outward postcode areas are retained for residential price comparison; full addresses are omitted."],
@@ -64,7 +64,8 @@ def retain(path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("csv", type=Path, help=f"Public CSV downloaded from {URL}")
+    parser.add_argument("--year", type=int, default=2025, help="Sale year the CSV covers (default 2025)")
     args = parser.parse_args()
-    output = retain(args.csv)
+    output = retain(args.csv, args.year)
     (ROOT / "data" / "price-paid-source.json").write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
     print(f"Retained {len(output['records'])}/{output['coverage']['downloadRecords']} public records")

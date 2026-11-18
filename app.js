@@ -592,14 +592,15 @@ function renderMarket() {
   const coverage = marketData.coverage;
   const filters = marketData.filters;
   const generated = formatDate(marketData.generatedAt);
+  const year = marketData.source.years.join(" and ");
   const scale = marketScale();
   const planMax = planContext().budgetMax;
   const showPlan = Number.isFinite(planMax) && planMax > 0 && planMax <= scale.max;
   const planLine = showPlan ? `<i class="plan-line" style="left:${scale.at(planMax)}"></i>` : "";
   workspace.innerHTML = `
     ${pageHead(
-      "2025 sold prices by area and property type",
-      "Completed 2025 sales in Winchester to compare against an asking price. None of these homes is for sale now.",
+      `${year} sold prices by area and property type`,
+      `Completed ${year} sales in Winchester to compare against an asking price. None of these homes is for sale now.`,
       `${coverage.includedRecords.toLocaleString("en-GB")} of ${coverage.sourceRecords.toLocaleString("en-GB")} Winchester district sales in the HM Land Registry file meet the rules below, covering ${formatDate(coverage.earliestSale)} to ${formatDate(coverage.latestSale)}. Source: HM Land Registry Price Paid Data, Open Government Licence v3.0.`,
     )}
     <section class="market-layout">
@@ -610,7 +611,7 @@ function renderMarket() {
         </div>
         <figure class="range-chart" style="--intervals:${scale.ticks.length - 1}">
           <figcaption>
-            <span class="chart-title">The middle half of 2025 sale prices in each group</span>
+            <span class="chart-title">The middle half of ${year} sale prices in each group</span>
             <span class="range-key" aria-hidden="true">
               <span><i class="key-range"></i>Middle half of sales</span>
               <span><i class="key-median"></i>Median</span>
@@ -649,7 +650,7 @@ function renderMarket() {
           <li>Adjust for condition, tenure, size and sale date.</li>
           <li>Keep listing claims separate from official completed sales.</li>
         </ul>
-        <p>Snapshot downloaded ${generated}. Later Land Registry releases can add or correct sales.</p>
+        <p>Sales registered to ${formatDate(coverage.latestSale)}. Snapshot downloaded ${generated}. Later Land Registry releases can add or correct sales.</p>
         <details><summary>Which sales are included</summary><p>Standard sales at full market value (category A), recorded as new entries (record status A), for detached, semi-detached and terraced houses and flats, priced from ${formatMoney.format(filters.priceRangeGbp[0])} to ${formatMoney.format(filters.priceRangeGbp[1])}. The median is the middle price. The low and high figures show the middle half of prices: a quarter of sales were below the low figure and a quarter above the high one.</p><p><a href="data/price-paid-source.json">See the source data and checksum</a></p><p><a href="docs/MARKET_DATA_CONTRACT.md">Read how the figures are built</a></p></details>
       </aside>
     </section>

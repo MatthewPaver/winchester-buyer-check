@@ -31,6 +31,17 @@ class SourceProjectionTests(unittest.TestCase):
             self.assertEqual(result["records"][0]["postcode"], "SO23")
             self.assertEqual(result["records"][0]["propertyType"], "terraced")
             self.assertNotIn("EXAMPLE STREET", str(result))
+            with self.assertRaisesRegex(ValueError, "2026 sale date"):
+                module.retain(path, 2026)
+
+    def test_year_argument_sets_years_and_download_url(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "synthetic.csv"
+            with path.open("w", newline="") as stream:
+                csv.writer(stream).writerow(["{synthetic-1}", "300000", "2026-03-01 00:00", "SO22 1AA", "F", "N", "L", "1", "", "EXAMPLE STREET", "", "WINCHESTER", "WINCHESTER", "HAMPSHIRE", "A", "A"])
+            result = module.retain(path, 2026)
+            self.assertEqual(result["source"]["years"], [2026])
+            self.assertTrue(result["source"]["downloadUrl"].endswith("/pp-2026.csv"))
 
 
 if __name__ == "__main__":
