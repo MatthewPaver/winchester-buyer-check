@@ -449,7 +449,7 @@ function homeCards() {
             </div>
             <div class="listing-side">
               <p class="listing-fit"><strong>${score}</strong><span>out of 100<br />fit score</span></p>
-              <p class="listing-sold"><span>Sold-price range</span>${home.soldBand}</p>
+              <p class="listing-sold"><span>Illustrative price band (made up)</span>${home.soldBand}</p>
               <span class="listing-cta">See full check ${icon("arrow")}</span>
             </div>
           </button>
@@ -973,7 +973,7 @@ function renderReview() {
           <div><dt>Walk to station</dt><dd>${home.station} min</dd></div>
           <div><dt>Layout</dt><dd>${plural(home.beds, "bedroom", "bedrooms")}, ${plural(home.toilets, "toilet", "toilets")}</dd></div>
           <div><dt>Condition</dt><dd>${conditionLabels[home.condition] || home.condition}</dd></div>
-          <div><dt>Sold-price range</dt><dd>${home.soldBand}</dd></div>
+          <div><dt>Illustrative price band (made up)</dt><dd>${home.soldBand}</dd></div>
           <div><dt>Facts confirmed</dt><dd>${home.evidence}%</dd></div>
         </dl>
 
@@ -1097,7 +1097,7 @@ function renderEvidence() {
       <aside class="source-register">
         <h2>Sources and how far to rely on them</h2>
         <article><b class="source-dot official"></b><div><strong>HM Land Registry</strong><span>Official record of completed sales and title. A sales snapshot is included with this example.</span></div><em class="tone-success">High</em></article>
-        <article><b class="source-dot supplied"></b><div><strong>Agent listing</strong><span>The agent’s claim. Check the home is still for sale.</span></div><em class="tone-attention">Medium</em></article>
+        <article><b class="source-dot supplied"></b><div><strong>Agent listing</strong><span>The agent’s claim. The nine homes here are made up, so there is no live listing to check.</span></div><em class="tone-attention">Medium</em></article>
         <article><b class="source-dot model"></b><div><strong>Affordability calculator</strong><span>Worked out from the numbers you enter on the Plan page.</span></div><em>Check inputs</em></article>
         <article><b class="source-dot missing"></b><div><strong>Survey and title</strong><span>Not supplied yet in this example.</span></div><em class="tone-danger">Missing</em></article>
       </aside>
